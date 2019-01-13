@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="refresh" content="60">
+	<link rel="stylesheet" type="text/css" href="default.css">
+</head>
+
+<body>
+	<div id="container">
+		<div id="location"></div>
+		<div id="tz"></div>
+		<div id="time"></div>
+		<div id="date"></div>
+		<div id="temp"></div>
+		<div id="temptype"></div>
+		<div id="weathertext"></div>
+		<div id="weathericon"></div>
+		<div id="forecast"></div>
+	</div>
+</body>
+
+<script type="text/javascript">
+	time = new Date();
+	var hh = time.getHours();
+	var mm = time.getMinutes();
+	var dd = time.getDay();
+	var yy = time.getFullYear();
+	var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+	var date = time.getDate();
+	var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+	var mon = time.getMonth();
+	var tz = time.getTimezoneOffset()/60;
+
+	if(mm<10) {
+		mm = "0" + mm
+	}
+
+	if(hh<10) {
+		hh = "0" + hh
+	}
+
+	//Write the Time to the page
+	document.getElementById('time').innerHTML = hh + ":" + mm;
+
+	//Write the Date to the page
+	document.getElementById('date').innerHTML = days[dd] + ", " + months[mon] + " " + date + ", " + yy;
+
+	//Write the timezone offset
+	document.getElementById('tz').innerHTML = "(UTC " + tz + ")"
+</script>
+
+</html>
