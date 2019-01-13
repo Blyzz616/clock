@@ -9,6 +9,8 @@ Raspberry Pi Zero W
 
 https://www.raspberrypi.org/products/raspberry-pi-zero-w/
 
-
+![Raspberry Pi](readme/rpzw.jpg?raw=true "Raspberry Pi")
 
 http://www.pervasivedisplays.com/products/740i
+
+![e-Ink](readme/pd.jpg?raw=true "e-Ink Display")
