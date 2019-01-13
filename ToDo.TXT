@@ -1,5 +1,5 @@
 	1. Figure out the set-up initialisation process
-    a. Set up a wifi internet connection
+    		a. Set up a wifi internet connection
 		b. Have option to forego internet option (dumb clock)
 		c. Set location
 			i. Timezone
@@ -18,6 +18,7 @@
 		a. set freq
 		b. set alarm type
 		c. set radio alarm
+		d. use RED to indicate alarm going off
 		
 	4. Internet Radio
 		a. select from list
@@ -46,3 +47,8 @@
 			ii. user settings
 
 	11. Is a backlight an option?
+	
+	12. Use RED to indicate Daylight savings time change
+	
+	13. Get pricing to mass-produce
+	14. Put together Kickstarter Video
