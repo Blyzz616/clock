@@ -51,4 +51,8 @@
 	12. Use RED to indicate Daylight savings time change
 	
 	13. Get pricing to mass-produce
+	
 	14. Put together Kickstarter Video
+	
+	15. Google Home integration
+		"Hey Google set my bedside alarm for seven AM"
