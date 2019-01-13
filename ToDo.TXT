@@ -1,0 +1,48 @@
+	1. Figure out the set-up initialisation process
+    a. Set up a wifi internet connection
+		b. Have option to forego internet option (dumb clock)
+		c. Set location
+			i. Timezone
+			ii. Country (optional - needed for weather)
+			iii. City (optional- needed for weather)
+		d. Information (telemetry) opt-in
+	
+	2. Interface
+		a. Default basic
+		b. Inverse
+		c. Additional designs
+			i.	Clock only
+			ii.	Weather forecast
+			
+	3. Audio Alarm Clock
+		a. set freq
+		b. set alarm type
+		c. set radio alarm
+		
+	4. Internet Radio
+		a. select from list
+		b. input own URL
+			
+	5. Get e-Ink working with SPI interface
+
+	6.Get weather update working
+		a. Weather now
+		b. Weather today (6-hour increments)
+		c. Weather 3-day forecast
+		d. Weather 3-day graph?
+		e. Weather 7-day?
+		
+	7. Get auto-update working
+		a. auto-update opt-out (opt-in?)
+		
+	8. Security
+		
+	9. Lock system down (in the beginning)
+		a. Allow unlock
+
+	10. Make image available
+		a. Maybe a store for the clock
+			i. user interfaces
+			ii. user settings
+
+	11. Is a backlight an option?
