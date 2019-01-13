@@ -14,6 +14,9 @@
 			i.	Clock only
 			ii.	Weather forecast
 			
+	3. Button interface
+		a. up/down/left/right/enter/back
+			
 	3. Audio Alarm Clock
 		a. set freq
 		b. set alarm type
@@ -56,3 +59,5 @@
 	
 	15. Google Home integration
 		"Hey Google set my bedside alarm for seven AM"
+		
+	16. Multi-cock support (more than one in a household)
