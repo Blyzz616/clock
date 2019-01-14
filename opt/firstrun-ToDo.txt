@@ -1,0 +1,15 @@
+Get input for 
+
+  1. Do you have a wifi connection?
+    a. No - Jump to Time [2]
+    b. Yes - Launch wifi SSID Discovery
+      i. Offer to connect to list of wifi APs
+      ii. Enter Password
+          Attempt DHCP connection
+      
+      
+  2. No Internet (Dumb clock)
+    a. Get Country
+    b. Get City
+    c. Enter Time
+    d. Set clock layout to dumb-clock
