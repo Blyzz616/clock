@@ -1,4 +1,3 @@
 #! /bin/bash
 
-touch /etc/clock/settings.json
-
+[[ ! -e /etc/epuncta/settings.json ]] && /opt/epuncta/setup.sh || init.sh
