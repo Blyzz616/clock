@@ -16,7 +16,7 @@ http://www.pervasivedisplays.com/products/740i
 ![e-Ink](readme/pd.jpg?raw=true "e-Ink Display")
 
 
-![dreamtime](stand.jpg?raw=true "Stand")
+![dreamtime](https://github.com/Blyzz616/clock/blob/master/stand.jpeg "Stand")
 
 ![dreamtime](bevel.jpg?raw=true "Bevel")
 
