@@ -14,3 +14,8 @@ https://www.raspberrypi.org/products/raspberry-pi-zero-w/
 http://www.pervasivedisplays.com/products/740i
 
 ![e-Ink](readme/pd.jpg?raw=true "e-Ink Display")
+
+
+(https://imgur.com/UdlfUt1)
+(https://imgur.com/IkyqoUh)
+(https://imgur.com/rJ9ABPe)
