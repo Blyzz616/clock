@@ -18,6 +18,6 @@ http://www.pervasivedisplays.com/products/740i
 
 ![dreamtime](https://github.com/Blyzz616/clock/blob/master/stand.jpeg "Stand")
 
-![dreamtime](bevel.jpg?raw=true "Bevel")
+![dreamtime](https://github.com/Blyzz616/clock/blob/master/bevel.jpeg "Bevel")
 
-![dreamtime](explode.jpg?raw=true "Explode")
+![dreamtime](https://github.com/Blyzz616/clock/blob/master/explode.jpeg "Explode")
