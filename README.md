@@ -16,8 +16,8 @@ http://www.pervasivedisplays.com/products/740i
 ![e-Ink](readme/pd.jpg?raw=true "e-Ink Display")
 
 
-![dreamtime](stand.jpg)
+![dreamtime](stand.jpg?raw=true "Stand")
 
-![dreamtime](https://imgur.com/IkyqoUh)
+![dreamtime](bevel.jpg?raw=true "Bevel")
 
-![dreamtime](https://imgur.com/rJ9ABPe)
+![dreamtime](explode.jpg?raw=true "Explode")
