@@ -14,3 +14,10 @@ https://www.raspberrypi.org/products/raspberry-pi-zero-w/
 http://www.pervasivedisplays.com/products/740i
 
 ![e-Ink](readme/pd.jpg?raw=true "e-Ink Display")
+
+
+![dreamtime](https://github.com/Blyzz616/clock/blob/master/stand.jpeg "Stand")
+
+![dreamtime](https://github.com/Blyzz616/clock/blob/master/bevel.jpeg "Bevel")
+
+![dreamtime](https://github.com/Blyzz616/clock/blob/master/explode.jpeg "Explode")

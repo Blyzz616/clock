@@ -1,0 +1,5 @@
+Turning buttons into keystrokes
+http://tjjr.fi/sw/python-uinput/
+
+Capacitive Touch
+https://learn.adafruit.com/capacitive-touch-sensors-on-the-raspberry-pi/programming
