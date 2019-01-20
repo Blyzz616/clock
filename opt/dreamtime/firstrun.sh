@@ -1,3 +1,3 @@
 #! /bin/bash
 
-[[ ! -e /etc/epuncta/settings.json ]] && /opt/epuncta/setup.sh || init.sh
+[[ ! -e /etc/dreamtime/settings.json ]] && /opt/dreamtime/setup.sh || dreamtime.sh
