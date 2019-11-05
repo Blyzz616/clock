@@ -1,0 +1,4 @@
+#! /bin/bash
+
+#get timezone from IP
+curl -s http://ip-api.com/json/$(curl -s icanhazip.com) | awk -F, '{print $10}' | awk -F\" '{print $4}'
