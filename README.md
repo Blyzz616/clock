@@ -11,9 +11,9 @@ https://www.raspberrypi.org/products/raspberry-pi-zero-w/
 
 ![Raspberry Pi](readme/rpzw.jpg?raw=true "Raspberry Pi")
 
-http://www.pervasivedisplays.com/products/740i
+https://www.waveshare.com/product/7.5inch-e-paper-hat-b.htm
 
-![e-Ink](readme/pd.jpg?raw=true "e-Ink Display")
+![e-Ink](readme/e-ink.png?raw=true "e-Ink Display")
 
 
 ![dreamtime](https://github.com/Blyzz616/clock/blob/master/stand.jpeg "Stand")
