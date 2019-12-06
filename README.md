@@ -11,10 +11,13 @@ https://www.raspberrypi.org/products/raspberry-pi-zero-w/
 
 ![Raspberry Pi](readme/rpzw.jpg?raw=true "Raspberry Pi")
 
-https://www.waveshare.com/product/7.5inch-e-paper-hat-b.htm
+https://www.waveshare.com/6inch-e-Paper-HAT.htm
 
-![e-Ink](readme/e-ink.png?raw=true "e-Ink Display")
+![e-Ink](readme/6inch-e-paper-hat-1.jpg?raw=true "e-Ink Display")
 
+https://www.waveshare.com/product/modules/oleds-lcds/e-paper/7.8inch-e-paper-hat.htm
+
+![e-Ink](readme/7.8inch-e-paper-hat-3_1.jpg?raw=true "e-Ink Display")
 
 ![dreamtime](https://github.com/Blyzz616/clock/blob/master/stand.jpeg "Stand")
 
