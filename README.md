@@ -13,7 +13,7 @@ https://www.raspberrypi.org/products/raspberry-pi-zero-w/
 
 https://www.waveshare.com/6inch-e-Paper-HAT.htm
 
-![e-Ink](readme/6inch-e-paper-hat-1.jpg?raw=true "6-inch e-Ink Display")
+![e-Ink](6inch-e-paper-hat-1.jpg?raw=true "6-inch e-Ink Display")
 
 Features:
 - No backlight, keeps displaying last content for a long time even when power down
@@ -39,7 +39,7 @@ Specifications:
 
 https://www.waveshare.com/product/modules/oleds-lcds/e-paper/7.8inch-e-paper-hat.htm
 
-![e-Ink](readme/7.8inch-e-paper-hat-3_1.jpg?raw=true "7.8-inch e-Ink Display")
+![e-Ink](7.8inch-e-paper-hat-3_1.jpg?raw=true "7.8-inch e-Ink Display")
 
 Features:
 - No backlight, keeps displaying last content for a long time even when power down
