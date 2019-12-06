@@ -21,6 +21,7 @@ Features:
 - Standard Raspberry Pi 40PIN GPIO extension header, supports Raspberry Pi series boards
 - USB/SPI/I80/I2C interface, for connecting with host boards like Raspberry Pi/Nucleo, etc.
 - Comes with development resources and manual (examples for Raspberry Pi/STM32)
+
 Specifications:
 - Operating voltage: 5V
 - Interface: USB/SPI/I80/I2C
@@ -47,6 +48,7 @@ Features:
 - Standard Raspberry Pi 40PIN GPIO extension header, supports Raspberry Pi series boards
 - USB/SPI/I80/I2C interface, for connecting with host boards like Raspberry Pi/Nucleo, etc.
 - Comes with development resources and manual (examples for Raspberry Pi/STM32)
+
 Specifications:
 - Operating voltage: 5V
 - Interface: USB/SPI/I80/I2C
