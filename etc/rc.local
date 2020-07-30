@@ -1,0 +1,30 @@
+#! /bin/bash
+#
+# rc.local
+#
+
+# GET IP AND LOCATION BASED ON IP & PUT IN /tmp/location.out
+curl -s "https://ipvigilante.com/$(curl -s icanhazip.com)" > /tmp/location.out
+
+# FORMAT /tmp/location.out INTO /tmp location.now
+cat /tmp/location.out | tr "," "\n" > /tmp/location.now
+
+# CHECK ON STATUS OF LOCATION CALL
+CALLSTATUS=$(cat /tmp/location.now | grep status | awk -F\" {'print $4'})
+if [[ $CALLSTATUS -ne "success" ]]; then
+        exit 1
+fi
+
+# POPULATE ALL VARIABLES
+COUNTRY=$(cat /tmp/location.now | grep country_name | awk -F\" {'print $4'})
+STATE=$(cat /tmp/location.now | grep subdivision_1_name | awk -F\" {'print $4'})
+CITY=$(cat /tmp/location.now | grep city_name | awk -F\" {'print $4'})
+
+# UPDATE COUNTRY IN SETTINGS FILE
+sed -i -e "s/\(country\"\:[a-zA-Z ]*\)/country\"\:${COUNTRY}"/ /etc/cl0ck/settings.json
+#UPDATE PROVINCE/STATE IN SETTINGS FILE
+sed -i -e "s/\(state\"\:[a-zA-Z ]*\)/state\"\:${STATE}"/ /etc/cl0ck/settings.json
+# UPDATE CITY IN SETTIGNS FILE
+sed -i -e "s/\(city\"\:[a-zA-Z ]*\)/city\"\:${CITY}"/ /etc/cl0ck/settings.json
+
+exit 0
