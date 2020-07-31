@@ -1,11 +1,13 @@
 #! /bin/bash
 #
 # rc.local
-#
+
 # GET IP AND LOCATION BASED ON IP & PUT IN /tmp/location.out
 curl -s "https://ipvigilante.com/$(curl -s icanhazip.com)" > /tmp/location.out
 # GET TIMEZONE
 curl -s https://ipapi.co/timezone > /tmp/timezone.out
+echo "" >> /tmp/timezone.out
+echo /tmp/timezone.out > /etc/timezone
 
 # FORMAT /tmp/location.out INTO /tmp location.now
 cat /tmp/location.out | tr "," "\n" > /tmp/location.now
@@ -22,6 +24,8 @@ COUNTRY=$(cat /tmp/location.now | grep country_name | awk -F\" {'print $4'})
 STATE=$(cat /tmp/location.now | grep subdivision_1_name | awk -F\" {'print $4'})
 CITY=$(cat /tmp/location.now | grep city_name | awk -F\" {'print $4'})
 TIMEZONE=$(cat /tmp/timezone.out)
+TZ3=$(date +%Z)
+TIMEDIFF=$(date +%z)
 
 # UPDATE COUNTRY IN SETTINGS FILE
 sed -i -e "s/\(country\"\:[a-zA-Z ]*\)/country\"\:${COUNTRY}"/ /etc/cl0ck/settings.json
@@ -29,7 +33,11 @@ sed -i -e "s/\(country\"\:[a-zA-Z ]*\)/country\"\:${COUNTRY}"/ /etc/cl0ck/settin
 sed -i -e "s/\(state\"\:[a-zA-Z ]*\)/state\"\:${STATE}"/ /etc/cl0ck/settings.json
 # UPDATE CITY IN SETTINGS FILE
 sed -i -e "s/\(city\"\:[a-zA-Z ]*\)/city\"\:${CITY}"/ /etc/cl0ck/settings.json
-# UPDATE TIMEZONE IN SETTINGS FILE - @ THAT SHIT
+# UPDATE ZONENAME IN SETTINGS FILE - @ THAT SHIT
 sed -i -e "s@\(zonename\"\:[a-zA-Z ]*\)@zonename\"\:${TIMEZONE}"@ /etc/cl0ck/settings.json
+# UPDATE TIMEZONE IN SETTINGS FILE
+sed -i -e "s/\(timezone\"\:[a-zA-Z ]*\)/timezone\"\:${TZ3}"/ /etc/cl0ck/settings.json
+# UPDATE ZONENAME IN SETTINGS FILE - @ THAT SHIT
+sed -i -e "s/\(timeshift\"\:[a-zA-Z ]*\)/timeshift\"\:${TIMEDIFF}"/ /etc/cl0ck/settings.json
 
 exit 0
