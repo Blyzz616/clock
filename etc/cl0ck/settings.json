@@ -5,6 +5,8 @@
         "timezone":,
         "timeshift":,
         "zonename":,
-        "flavour":vanilla,
+        "face":,
+        "flavour":,
+        "scheme":,
         "version":0.1
 }
