@@ -38,6 +38,6 @@ sed -i -e "s@\(zonename\"\:[a-zA-Z ]*\)@zonename\"\:${TIMEZONE}"@ /etc/cl0ck/set
 # UPDATE TIMEZONE IN SETTINGS FILE
 sed -i -e "s/\(timezone\"\:[a-zA-Z ]*\)/timezone\"\:${TZ3}"/ /etc/cl0ck/settings.json
 # UPDATE ZONENAME IN SETTINGS FILE - @ THAT SHIT
-sed -i -e "s/\(timeshift\"\:[a-zA-Z ]*\)/timeshift\"\:${TIMEDIFF}"/ /etc/cl0ck/settings.json
+sed -i -e "s/\(timeshift\"\:[+-a-zA-Z ]*\)/timeshift\"\:${TIMEDIFF}"/ /etc/cl0ck/settings.json
 
 exit 0
