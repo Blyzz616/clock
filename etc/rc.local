@@ -1,7 +1,9 @@
 #! /bin/bash
 #
 # rc.local
+#
 
+function LOCATIONLOOKUP() {
 # GET IP AND LOCATION BASED ON IP & PUT IN /tmp/location.out
 curl -s "https://ipvigilante.com/$(curl -s icanhazip.com)" > /tmp/location.out
 # GET TIMEZONE
@@ -27,8 +29,6 @@ TIMEZONE=$(cat /tmp/timezone.out)
 TZ3=$(date +%Z)
 TIMEDIFF=$(date +%z)
 
-# THIS NEEDS FIXING
-
 # UPDATE COUNTRY IN SETTINGS FILE
 sed -i -e "s/\(country\"\:[a-zA-Z ]*\)/country\"\:${COUNTRY}"/ /etc/cl0ck/settings.json
 #UPDATE PROVINCE/STATE IN SETTINGS FILE
@@ -36,10 +36,13 @@ sed -i -e "s/\(state\"\:[a-zA-Z ]*\)/state\"\:${STATE}"/ /etc/cl0ck/settings.jso
 # UPDATE CITY IN SETTINGS FILE
 sed -i -e "s/\(city\"\:[a-zA-Z ]*\)/city\"\:${CITY}"/ /etc/cl0ck/settings.json
 # UPDATE ZONENAME IN SETTINGS FILE - @ THAT SHIT
-sed -i -e "s@\(zonename\"\:[a-zA-Z ]*\)@zonename\"\:${TIMEZONE}"@ /etc/cl0ck/settings.json
+sed -i -e "s@\(zonename\"\:[\a-zA-Z ]*\)@zonename\"\:${TIMEZONE}"@ /etc/cl0ck/settings.json
 # UPDATE TIMEZONE IN SETTINGS FILE
 sed -i -e "s/\(timezone\"\:[a-zA-Z ]*\)/timezone\"\:${TZ3}"/ /etc/cl0ck/settings.json
 # UPDATE ZONENAME IN SETTINGS FILE - @ THAT SHIT
 sed -i -e "s/\(timeshift\"\:[+-a-zA-Z ]*\)/timeshift\"\:${TIMEDIFF}"/ /etc/cl0ck/settings.json
+}
+
+[[ $(cat /etc/cl0ck/settings.json | grep lookup | awk -F: '{print $2}' | awk -F, '{print $1}') -eq "true" ]] && LOCATIONLOOKUP
 
 exit 0
