@@ -1,6 +1,7 @@
 	1. Figure out the set-up initialisation process
     		a. Set up a wifi internet connection
 		b. Have option to forego internet option (dumb clock)
+			i. Set Time
 		c. Set location
 			i. Timezone
 			ii. Country (optional - needed for weather)
@@ -29,7 +30,7 @@
 			
 	5. Get e-Ink working with SPI interface
 
-	6.Get weather update working
+	6. Get weather update working
 		a. Weather now
 		b. Weather today (6-hour increments)
 		c. Weather 3-day forecast
@@ -51,7 +52,7 @@
 
 	11. Is a backlight an option?
 	
-	12. Use RED to indicate Daylight savings time change
+	-12. Use RED to indicate Daylight savings time change - NO RED-
 	
 	13. Get pricing to mass-produce
 	
