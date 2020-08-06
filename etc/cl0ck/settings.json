@@ -1,12 +1,22 @@
 {
-        "country":,
-        "state":,
-        "city":,
-        "timezone":,
-        "timeshift":,
-        "zonename":,
-        "face":,
-        "flavour":,
-        "scheme":,
+        "country":Canada
+        "state":British Columbia
+        "city":Vancouver
+        "timezone":PDT
+        "timeshift":-0700
+        "zonename":America/Vancouver
+        "face":Roboto-Thin-Italic
+        "flavour":digital
+        "scheme":inverse
+        "hands":incremental
+        "locationlookup":true
         "version":0.1
 }
+
+# face          the font-face to use for the digital clock
+# flavour       what type of clock will be disaplyed
+#       digital | analogue
+# scheme        what the look will be; light or dark
+#       direct | inverse
+# hands         will the hour hand move each minute or once per hour
+#       incremental | hourly
