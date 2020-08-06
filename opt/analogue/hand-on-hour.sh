@@ -3,7 +3,7 @@
 MDEG=$(expr 6 \* $(date +%M))
 HDEG=$(expr 30 \* $(date +%H))
 
-if [[ $(cat /etc/cl0ck/settings.json | grep scheme | awk -F: '{print $2}' | awk -F, '{print $1}') -eq "direct" ]];
+if [[ $(cat /etc/cl0ck/settings.json | grep scheme | awk -F: '{print $2}' | awk -F, '{print $1}') = "direct" ]];
 then
 convert -size 800x600 xc:white \
 -stroke black -fill white -strokewidth 2 -draw "circle 400.5,300.5 400.5,20.5" \
