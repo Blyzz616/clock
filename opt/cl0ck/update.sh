@@ -1,3 +1,9 @@
+###
+#THIS FILE IS DEPRECATED 
+# NEW FILE IS UUPDATEDISPLAY.SH
+###
+
+
 #! /bin/bash
 
 H=$(date +%H)
