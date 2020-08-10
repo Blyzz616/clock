@@ -1,7 +1,12 @@
 #! /bin/bash
 
-# SEND IMAGE TO DISPLAY
-/IT8951/IT8951 0 0 /tmp/display.bmp
+UPDATE() {
+    # SEND IMAGE TO DISPLAY
+    /IT8951/IT8951 0 0 /tmp/display.bmp
+}
+
+# WAS THE CL0CK RECENTLY REBOOTED?
+READY=$(cat /opt/cl0ck/status.rdy)
 
 # WHICH CLOCK FACE DO YOU FEEL LIKE SEEING TODAY? DIGITAL OR ANALOGUE
 FLAVOUR=$(cat /etc/cl0ck/settings.json | grep flavour | awk -F: '{print $2}')
@@ -13,8 +18,6 @@ SCHEME=$(cat /etc/cl0ck/settings.json | grep scheme | awk -F: '{print $2}')
 REZ="-size 800x600"
 # WHICH FONT FACE?
 FACE=$(cat /etc/cl0ck/settings.json | grep face | awk -F: '{print $2}')
-# FONTSIZE
-FONTSIZE="300"
 
 # WHERE THE OUTPUT WILL BE SENT
 OUT="/tmp/display.bmp"
@@ -24,6 +27,7 @@ WORKING="/opt/cl0ck"
 # OK, LET'S BUILD THE IMAGE FOR THE NEXT DISPLAY UPDATE
 # FIRST, LET'S FIGURE OUT WHAT THE TIME WILL BE IN A MINUTE
 
+MINUTEPLUS() {
 PDH=$(date +%H) #Pre-Date-Hour
 PDM=$(date +%M) #Pre-Date-Minute
 if [[ $PDM -eq 59 ]];
@@ -39,6 +43,12 @@ else
     M=$(expr $PDM + 1)
     H=$PDH
 fi
+}
+
+MINUTENOW() {
+M=$(date +%M)
+H=$(date +%H)
+}
 
 # NOW TO DO THE HEAVY LIFTING
 # FIRST UP IS THE DIGITAL CL0CK
@@ -260,12 +270,46 @@ fi
 
 }
 
-# WHAT CLOCK FACE ARE WE GOING TO USE?
-if [[ $FLAVOUR = "digital" ]];
+# IF WE'VE JUST REBOOTED
+if [[ $READY = 0 ]];
 then
-    DIGITAL
+    # SET THE TIME TO NOW
+    MINUTENOW
+    # RUN THE CODE TO SAVE THE DISPLAY IMAGE
+    if [[ $FLAVOUR = "digital" ]];
+    then
+        DIGITAL
+    else
+        ANALOGUE
+    fi
+
+    # AND UPDATE IT
+    UPDATE
+    # THEN IMMEDIATELY PREP FOR NEXT UPDAT BY GETTING THE NEXT MINUTE
+    MINUTEPLUS
+    # AND FIGURING OUT THE CL0CK TYPE AND SAVING THE DISPLAY
+    if [[ $FLAVOUR = "digital" ]];
+    then
+        DIGITAL
+    else
+        ANALOGUE
+    fi
+
+    # AS WE'VE RUN SIME CODE SINCE REBOOTING, SET THE READY FLAG TO 1
+    echo "1" > /opt/cl0ck/status.rdy
 else
-    ANALOGUE
+    # THIS IS WHAT HAPPENS IF WE HAVEN'T JUST REBOOTED
+    # THERE SHOULD BE AN IMAGE READY TO GO
+    UPDATE
+    # SET THE TIME TO NEXT MINUTE
+    MINUTEPLUS
+    # WHAT CLOCK FACE ARE WE GOING TO USE?
+    if [[ $FLAVOUR = "digital" ]];
+    then
+        DIGITAL
+    else
+        ANALOGUE
+    fi
 fi
 
 # LEGACY CODE
