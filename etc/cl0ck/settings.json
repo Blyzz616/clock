@@ -8,6 +8,7 @@
         "face":Roboto-Thin-Italic
         "flavour":digital
         "scheme":inverse
+        "dateformat":full
         "hands":incremental
         "locationlookup":true
         "version":0.1
@@ -20,3 +21,5 @@
 #       direct | inverse
 # hands         will the hour hand move each minute or once per hour
 #       incremental | hourly
+# dateformat
+#       full | yymmdd | ddmmyy | mmddyy
