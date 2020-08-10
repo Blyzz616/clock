@@ -22,4 +22,4 @@
 # hands         will the hour hand move each minute or once per hour
 #       incremental | hourly
 # dateformat
-#       full | yymmdd | ddmmyy | mmddyy
+#       full | yymmdd | ddmmyy | mmddyy | none
