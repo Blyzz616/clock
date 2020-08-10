@@ -88,6 +88,28 @@ then
             convert -size 800x600 xc:black -fill white Roboto-Thin-Italic -pointsize 300 -gravity center -draw "text 0,0 '$H:$M' " $OUT
         fi
     fi
+elif [[ $FACE = "Digital-7-MonoItalic" ]];
+then
+    if [[ ${#M} -eq 1 ]];
+    then
+        if [[ $SCHEME = "direct" ]];
+        then
+            # Black on White
+            convert -size 800x600 xc:white -font Digital-7-MonoItalic -pointsize 300 -gravity center -region 800x600+0-50 -draw "text 0,0 '$H:0$M' " $OUT
+        else
+            # White on Black
+            convert -size 800x600 xc:black -fill white -font Digital-7-MonoItalic -pointsize 300 -gravity center -region 800x600+0-50 -draw "text 0,0 '$H:0$M' " $OUT
+        fi
+    else
+        if [[ $SCHEME = "direct" ]];
+        then
+            # Black on White
+            convert -size 800x600 xc:white -font Digital-7-MonoItalic -pointsize 300 -gravity center -region 800x600+0-50 -draw "text 0,0 '$H:$M' " $OUT
+        else
+            # White on Black
+            convert -size 800x600 xc:black -fill white Digital-7-MonoItalic -pointsize 300 -gravity center -region 800x600+0-50 -draw "text 0,0 '$H:$M' " $OUT
+        fi
+    fi
 else
     convert -size 800x600 xc:white  -pointsize 30 -gravity center -draw "text 0,0 'Font not found' " $OUT
     echo "Missing font" >> /var/log/cl0ck.err
