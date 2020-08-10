@@ -1,13 +1,25 @@
 #! /bin/bash
 
-#SEND IMAGE TO DISPLAY
-#/IT8951/IT8951 0 0 /tmp/display.bmp
+# SEND IMAGE TO DISPLAY
+/IT8951/IT8951 0 0 /tmp/display.bmp
 
 # WHICH CLOCK FACE DO YOU FEEL LIKE SEEING TODAY? DIGITAL OR ANALOGUE
 FLAVOUR=$(cat /etc/cl0ck/settings.json | grep flavour | awk -F: '{print $2}')
 
-#LIGHT OR DARK?
+# LIGHT OR DARK?
 SCHEME=$(cat /etc/cl0ck/settings.json | grep scheme | awk -F: '{print $2}')
+
+# RESOLUTION
+REZ="-size 800x600"
+# WHICH FONT FACE?
+FACE=$(cat /etc/cl0ck/settings.json | grep face | awk -F: '{print $2}')
+# FONTSIZE
+FONTSIZE="300"
+
+# WHERE THE OUTPUT WILL BE SENT
+OUT="/tmp/display.bmp"
+
+WORKING="/opt/cl0ck"
 
 # OK, LET'S BUILD THE IMAGE FOR THE NEXT DISPLAY UPDATE
 # FIRST, LET'S FIGURE OUT WHAT THE TIME WILL BE IN A MINUTE
@@ -16,28 +28,69 @@ PDH=$(date +%H) #Pre-Date-Hour
 PDM=$(date +%M) #Pre-Date-Minute
 if [[ $PDM -eq 59 ]];
 then
-        M="00"
-        if [[ $PDH -eq 23 ]];
-        then
-                H="00"
-        else
-                H=$(expr $PDH + 1)
-        fi
+    M="00"
+    if [[ $PDH -eq 23 ]];
+    then
+         H="00"
+    else
+        H=$(expr $PDH + 1)
+    fi
 else
-        M=$(expr $PDM + 1)
+    M=$(expr $PDM + 1)
+    H=$PDH
 fi
 
 # NOW TO DO THE HEAVY LIFTING
 # FIRST UP IS THE DIGITAL CL0CK
 function DIGITAL() {
 
-if [[ $SCHEME = "direct" ]];
+if [[ $FACE = "Digital-7-Italic" ]];
 then
-    # Simple Vanilla Clock
-    convert -size 800x600 xc:white -font Nimbus-Roman-No9-L-Regular-Italic -pointsize 300 -gravity center -draw "text 0,0 '$H:$M' " /tmp/display.bmp
+    if [[ ${#M} -eq 1 ]];
+    then
+        if [[ $SCHEME = "direct" ]];
+        then
+            # Black on White
+            convert -size 800x600 xc:white -font Digital-7-Italic -pointsize 380 -gravity center -region 800x600+0-50 -draw "text 0,0 '$H:0$M' " $OUT
+        else
+            # White on Black
+            convert -size 800x600 xc:black -fill white -font Digital-7-Italic -pointsize 380 -gravity center -region 800x600+0-50 -draw "text 0,0 '$H:0$M' " $OUT
+        fi
+    else
+        if [[ $SCHEME = "direct" ]];
+        then
+            # Black on White
+            convert -size 800x600 xc:white -font Digital-7-Italic -pointsize 380 -gravity center -region 800x600+0-50 -draw "text 0,0 '$H:$M' " $OUT
+        else
+            # White on Black
+            convert -size 800x600 xc:black -fill white -font Digital-7-Italic -pointsize 380 Digital-7-Italic -gravity center -region 800x600+0-50 -draw "text 0,0 '$H:$M' " $OUT
+        fi
+    fi
+elif [[ $FACE = "Roboto-Thin-Italic" ]];
+then
+    if [[ ${#M} -eq 1 ]];
+    then
+        if [[ $SCHEME = "direct" ]];
+        then
+            # Black on White
+            convert -size 800x600 xc:white -font Roboto-Thin-Italic -pointsize 300 -gravity center -draw "text 0,0 '$H:0$M' " $OUT
+        else
+            # White on Black
+            convert -size 800x600 xc:black -fill white -font Roboto-Thin-Italic -pointsize 300 -gravity center -draw "text 0,0 '$H:0$M' " $OUT
+        fi
+    else
+        if [[ $SCHEME = "direct" ]];
+        then
+            # Black on White
+            convert -size 800x600 xc:white -font Roboto-Thin-Italic -pointsize 300 -gravity center -draw "text 0,0 '$H:$M' " $OUT
+        else
+            # White on Black
+            convert -size 800x600 xc:black -fill white Roboto-Thin-Italic -pointsize 300 -gravity center -draw "text 0,0 '$H:$M' " $OUT
+        fi
+    fi
 else
-    # Inverse Vanilla
-    convert -size 800x600 xc:black -fill white -font Nimbus-Roman-No9-L-Regular-Italic -pointsize 300 -gravity center -draw "text 0,0 '$H:$M' " /tmp/display.bmp
+    convert -size 800x600 xc:white  -pointsize 30 -gravity center -draw "text 0,0 'Font not found' " $OUT
+    echo "Missing font" >> /var/log/cl0ck.err
 fi
 
 }
@@ -52,7 +105,7 @@ HDEG=$(echo "scale = 1; $GEDM + $GEDH" | bc)
 
 if [[ $SCHEME = "direct" ]];
 then
-    convert -size 800x600 xc:white \
+convert -size 800x600 xc:white \
 -stroke black -strokewidth 3 -draw "translate 400.5,300.5 rotate 0 line 0,280 0,260" \
 -stroke black -strokewidth 3 -draw "translate 400.5,300.5 rotate 30 line 0,280 0,260" \
 -stroke black -strokewidth 3 -draw "translate 400.5,300.5 rotate 60 line 0,280 0,260" \
@@ -65,57 +118,57 @@ then
 -stroke black -strokewidth 3 -draw "translate 400.5,300.5 rotate 270 line 0,280 0,260" \
 -stroke black -strokewidth 3 -draw "translate 400.5,300.5 rotate 300 line 0,280 0,260" \
 -stroke black -strokewidth 3 -draw "translate 400.5,300.5 rotate 330 line 0,280 0,260" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 6 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 12 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 18 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 24 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 36 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 42 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 48 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 54 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 66 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 72 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 78 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 84 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 96 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 102 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 108 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 114 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 126 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 132 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 138 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 144 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 156 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 162 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 168 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 174 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 186 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 192 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 198 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 204 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 216 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 222 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 228 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 234 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 246 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 252 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 258 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 264 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 276 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 282 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 288 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 294 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 306 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 312 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 318 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 324 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 336 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 342 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 348 line 0,280 0,270" \
--stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 354 line 0,280 0,270" \
--stroke black -strokewidth 3 -draw "translate 400.5,300.5 rotate $MDEG line 0,60 0,-240" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 6 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 12 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 18 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 24 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 36 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 42 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 48 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 54 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 66 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 72 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 78 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 84 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 96 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 102 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 108 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 114 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 126 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 132 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 138 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 144 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 156 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 162 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 168 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 174 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 186 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 192 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 198 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 204 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 216 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 222 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 228 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 234 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 246 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 252 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 258 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 264 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 276 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 282 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 288 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 294 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 306 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 312 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 318 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 324 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 336 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 342 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 348 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate 354 line 0,280 0,273" \
+-stroke black -strokewidth 1 -draw "translate 400.5,300.5 rotate $MDEG line 0,60 0,-240" \
 -stroke black -strokewidth 8 -draw "translate 400.5,300.5 rotate $HDEG line 0,40 0,-150" \
-/tmp/display.bmp
+$OUT
 else
     convert -size 800x600 xc:black \
 -stroke white -strokewidth 3 -draw "translate 400.5,300.5 rotate 0 line 0,280 0,260" \
@@ -130,57 +183,57 @@ else
 -stroke white -strokewidth 3 -draw "translate 400.5,300.5 rotate 270 line 0,280 0,260" \
 -stroke white -strokewidth 3 -draw "translate 400.5,300.5 rotate 300 line 0,280 0,260" \
 -stroke white -strokewidth 3 -draw "translate 400.5,300.5 rotate 330 line 0,280 0,260" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 6 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 12 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 18 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 24 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 36 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 42 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 48 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 54 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 66 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 72 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 78 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 84 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 96 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 102 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 108 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 114 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 126 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 132 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 138 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 144 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 156 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 162 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 168 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 174 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 186 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 192 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 198 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 204 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 216 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 222 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 228 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 234 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 246 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 252 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 258 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 264 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 276 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 282 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 288 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 294 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 306 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 312 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 318 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 324 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 336 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 342 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 348 line 0,280 0,270" \
--stroke white -strokewidth 1 -draw "translate 400.5,300.5 rotate 354 line 0,280 0,270" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 6 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 12 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 18 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 24 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 36 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 42 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 48 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 54 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 66 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 72 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 78 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 84 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 96 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 102 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 108 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 114 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 126 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 132 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 138 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 144 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 156 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 162 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 168 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 174 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 186 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 192 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 198 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 204 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 216 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 222 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 228 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 234 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 246 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 252 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 258 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 264 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 276 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 282 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 288 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 294 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 306 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 312 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 318 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 324 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 336 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 342 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 348 line 0,280 0,273" \
+-stroke grey -strokewidth 1 -draw "translate 400.5,300.5 rotate 354 line 0,280 0,273" \
 -stroke white -strokewidth 3 -draw "translate 400.5,300.5 rotate $MDEG line 0,60 0,-240" \
 -stroke white -strokewidth 8 -draw "translate 400.5,300.5 rotate $HDEG line 0,40 0,-150" \
-/tmp/display.bmp
+$OUT
 fi
 
 }
@@ -192,3 +245,9 @@ then
 else
     ANALOGUE
 fi
+
+# LEGACY CODE
+# THIS IS THE CIRCLE AROUND THE ANALOGUE CL0CK
+#-stroke black -fill white -strokewidth 2 -draw "circle 400.5,300.5 400.5,20.5" \
+#-stroke white -fill black -strokewidth 2 -draw "circle 400.5,300.5 400.5,20.5" \
+# silly code with the circle is (define centre) (define one point on circle)
