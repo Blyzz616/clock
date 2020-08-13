@@ -5,6 +5,36 @@ UPDATE() {
     /IT8951/IT8951 0 0 /tmp/display.bmp
 }
 
+WEATHER() {
+    curl -s "http://api.openweathermap.org/data/2.5/weather?id=5881792&units=metric&appid=12cf76465a58356df52c88853dbfe100" > opt/cl0ck/weather/now.json
+    OPENWEATHER=(cat /opt/cl0ck/weather/now.json)
+    TEMP=$(echo $OPENWEATHER | egrep -o 'temp\":[0-9.]*' | awk -F: '{print $2}' | awk '{print ($0-int($0)<0.499)?int($0):int($0)+1}')
+    FEELSLIKE=$(echo $OPENWEATHER | egrep -o 'feels\_like\":[0-9.]*' | awk -F: '{print $2}' | awk '{print ($0-int($0)<0.499)?int($0):int($0)+1')
+    TMIN=$(echo $OPENWEATHER | egrep -o 'temp\_min\":[0-9.]*')
+    TMAX=$(echo $OPENWEATHER | egrep -o 'temp\_max\":[0-9.]*')
+    PRESSURE=$(echo $OPENWEATHER | egrep -o 'pressure\":[0-9]*')
+    HUMIDITY=$(echo $OPENWEATHER | egrep -o 'humidity\":[0-9]*')
+    WINDSPEED=$(echo $OPENWEATHER | egrep -o 'speed\":[0-9]*')
+    WINDBEARING=$(echo $OPENWEATHER | egrep -o 'deg\":[0-9]*')
+    SUNRISE=$(echo $OPENWEATHER | egrep -o 'sunrise\":[0-9]*')
+    SUNSET=$(echo $OPENWEATHER | egrep -o 'sunset\":[0-9]*')
+    CLOUDS=$(echo $OPENWEATHER | egrep -o 'description\":[a-z ]*')
+    ICON=$(echo $OPENWEATHER | egrep -o 'icon\":\"[a-z0-9]')
+
+    echo "TEMP = $TEMP" > /opt/cl0ck/weather/weather.dump
+    echo "FEELSLIKE = $FEELSLIKE" >> /opt/cl0ck/weather/weather.dump
+    echo "TMIN = $TMIN" >> /opt/cl0ck/weather/weather.dump
+    echo "TMAX = $TMAX" >> /opt/cl0ck/weather/weather.dump
+    echo "PRESSURE = $PRESSURE" >> /opt/cl0ck/weather/weather.dump
+    echo "HUMIDITY = $HUMIDITY" >> /opt/cl0ck/weather/weather.dump
+    echo "WINDSPEED = $WINDSPEED" >> /opt/cl0ck/weather/weather.dump
+    echo "WINDBEARING = $WINDBEARING" >> /opt/cl0ck/weather/weather.dump
+    echo "SUNRISE = $SUNRISE" >> /opt/cl0ck/weather/weather.dump
+    echo "SUNSET = $SUNSET" >> /opt/cl0ck/weather/weather.dump
+    echo "CLOUDS = $CLOUDS" >> /opt/cl0ck/weather/weather.dump
+    echo "ICON = $ICON" >> /opt/cl0ck/weather/weather.dump
+}
+
 # WAS THE CL0CK RECENTLY REBOOTED?
 READY=$(cat /opt/cl0ck/status.rdy)
 
@@ -241,3 +271,5 @@ else
         ANALOGUE
     fi
 fi
+
+WEATHER
