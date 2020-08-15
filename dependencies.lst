@@ -1,0 +1,20 @@
+Seeting up new card:
+in /boot/
+create new file "ssh"
+create new file "wpa_supplicant.conf"
+  With contents:
+
+
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+country=CA
+
+network={
+ ssid="<Name of your wireless LAN>"
+ psk="<Password for your wireless LAN>"
+}
+
+sudo su
+sed -i /s// /etc/ssh/ssh
+
+Dependencies:
