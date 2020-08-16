@@ -1,25 +1,25 @@
 #! /bin/bash
 
-UPDATE() {
+#UPDATE() {
     # SEND IMAGE TO DISPLAY
-    /IT8951/IT8951 0 0 /tmp/display.bmp
-}
+    #/IT8951/IT8951 0 0 /tmp/display.bmp
+#}
 
 WEATHER() {
-    curl -s "http://api.openweathermap.org/data/2.5/weather?id=5881792&units=metric&appid=12cf76465a58356df52c88853dbfe100" > opt/cl0ck/weather/now.json
-    OPENWEATHER=(cat /opt/cl0ck/weather/now.json)
+    curl -s "http://api.openweathermap.org/data/2.5/weather?id=5881792&units=metric&appid=12cf76465a58356df52c88853dbfe100" > /opt/cl0ck/weather/now.json
+    OPENWEATHER=$(cat /opt/cl0ck/weather/now.json)
     TEMP=$(echo $OPENWEATHER | egrep -o 'temp\":[0-9.]*' | awk -F: '{print $2}' | awk '{print ($0-int($0)<0.499)?int($0):int($0)+1}')
-    FEELSLIKE=$(echo $OPENWEATHER | egrep -o 'feels\_like\":[0-9.]*' | awk -F: '{print $2}' | awk '{print ($0-int($0)<0.499)?int($0):int($0)+1')
-    TMIN=$(echo $OPENWEATHER | egrep -o 'temp\_min\":[0-9.]*')
-    TMAX=$(echo $OPENWEATHER | egrep -o 'temp\_max\":[0-9.]*')
-    PRESSURE=$(echo $OPENWEATHER | egrep -o 'pressure\":[0-9]*')
-    HUMIDITY=$(echo $OPENWEATHER | egrep -o 'humidity\":[0-9]*')
-    WINDSPEED=$(echo $OPENWEATHER | egrep -o 'speed\":[0-9]*')
-    WINDBEARING=$(echo $OPENWEATHER | egrep -o 'deg\":[0-9]*')
-    SUNRISE=$(echo $OPENWEATHER | egrep -o 'sunrise\":[0-9]*')
-    SUNSET=$(echo $OPENWEATHER | egrep -o 'sunset\":[0-9]*')
-    CLOUDS=$(echo $OPENWEATHER | egrep -o 'description\":[a-z ]*')
-    ICON=$(echo $OPENWEATHER | egrep -o 'icon\":\"[a-z0-9]')
+    FEELSLIKE=$(echo $OPENWEATHER | egrep -o 'feels\_like\":[0-9.]*' | awk -F: '{print $2}' | awk '{print ($0-int($0)<0.499)?int($0):int($0)+1}')
+    TMIN=$(echo $OPENWEATHER | egrep -o 'temp\_min\":[0-9.]*' | awk -F: '{print $2}')
+    TMAX=$(echo $OPENWEATHER | egrep -o 'temp\_max\":[0-9.]*' | awk -F: '{print $2}')
+    PRESSURE=$(echo $OPENWEATHER | egrep -o 'pressure\":[0-9]*' | awk -F: '{print $2}')
+    HUMIDITY=$(echo $OPENWEATHER | egrep -o 'humidity\":[0-9]*' | awk -F: '{print $2}')
+    WINDSPEED=$(echo $OPENWEATHER | egrep -o 'speed\":[0-9]*' | awk -F: '{print $2}')
+    WINDBEARING=$(echo $OPENWEATHER | egrep -o 'deg\":[0-9]*' | awk -F: '{print $2}')
+    SUNRISE=$(echo $OPENWEATHER | egrep -o 'sunrise\":[0-9]*' | awk -F: '{print $2}')
+    SUNSET=$(echo $OPENWEATHER | egrep -o 'sunset\":[0-9]*' | awk -F: '{print $2}')
+    CLOUDS=$(echo $OPENWEATHER | egrep -o 'description\":\"[a-zA-Z ]*' | awk -F: '{print $2}' | cut -c2-)
+    ICON=$(echo $OPENWEATHER | egrep -o 'icon\":\"[a-z0-9]*' | awk -F: '{print $2}' | cut -c2-)
 
     echo "TEMP = $TEMP" > /opt/cl0ck/weather/weather.dump
     echo "FEELSLIKE = $FEELSLIKE" >> /opt/cl0ck/weather/weather.dump
@@ -103,7 +103,7 @@ if [[ $SCHEME = "direct" ]];
 then
     CANVAS="white"
     HANDS="-stroke black"
-    else
+else
     CANVAS="black -fill white"
     HANDS="-stroke white"
 fi
@@ -244,7 +244,7 @@ then
     fi
 
     # AND UPDATE IT
-    UPDATE
+    #UPDATE
     # THEN IMMEDIATELY PREP FOR NEXT UPDAT BY GETTING THE NEXT MINUTE
     MINUTEPLUS
     # AND FIGURING OUT THE CL0CK TYPE AND SAVING THE DISPLAY
@@ -260,7 +260,7 @@ then
 else
     # THIS IS WHAT HAPPENS IF WE HAVEN'T JUST REBOOTED
     # THERE SHOULD BE AN IMAGE READY TO GO
-    UPDATE
+    #UPDATE
     # SET THE TIME TO NEXT MINUTE
     MINUTEPLUS
     # WHAT CLOCK FACE ARE WE GOING TO USE?
@@ -273,3 +273,4 @@ else
 fi
 
 WEATHER
+
