@@ -34,6 +34,7 @@ WEATHER() {
     echo "CLOUDS = $CLOUDS" >> /opt/cl0ck/weather/weather.dump
     echo "ICON = $ICON" >> /opt/cl0ck/weather/weather.dump
 }
+WEATHER
 
 # WAS THE CL0CK RECENTLY REBOOTED?
 READY=$(cat /opt/cl0ck/status.rdy)
@@ -143,7 +144,7 @@ function DIGITAL() {
     then
         convert -size 800x600 xc:$CANVAS $FACE $TIMESIZE -gravity center -draw "text $ALIGN '$H:$M' " $OUT
     else
-        convert -size 800x600 xc:$CANVAS $FACE $TIMESIZE -gravity center -draw "text $ALIGN '$H:$M' " $FACE $DATESIZE -gravity southeast -draw "text +20,+20 '$TODAY' " $FACE $WEATHERSIZE -gravity northwest -draw "text 0,0 ' $TEMP '" $OUT
+        convert -size 800x600 xc:$CANVAS $FACE $TIMESIZE -gravity center -draw "text $ALIGN '$H:$M' " $FACE $WEATHERSIZE -gravity northwest -draw "text +20,+20 '$TEMP°C' " $DATESIZE -gravity southeast -draw "text +20,+20 '$TODAY' " $OUT
     fi
 }
 
@@ -278,4 +279,4 @@ else
     fi
 fi
 
-WEATHER
+
