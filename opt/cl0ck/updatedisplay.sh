@@ -33,6 +33,7 @@ WEATHER() {
     echo "SUNSET = $SUNSET" >> /opt/cl0ck/weather/weather.dump
     echo "CLOUDS = $CLOUDS" >> /opt/cl0ck/weather/weather.dump
     echo "ICON = $ICON" >> /opt/cl0ck/weather/weather.dump
+    WEATHERICON="/opt/cl0ck/weather/img/$ICON.bmp"
 }
 WEATHER
 
@@ -57,7 +58,7 @@ fi
 # FONT SIZES
 TIMESIZE="-pointsize 300"
 DATESIZE="-pointsize 50"
-WEATHERSIZE="-pointsize 100"
+WEATHERSIZE="-pointsize 75"
 
 # WHAT DATE TO DISPLAY
 DATEFORMAT=$(cat /etc/cl0ck/settings.json | grep dateformat | awk -F: '{print $2}')
@@ -144,7 +145,9 @@ function DIGITAL() {
     then
         convert -size 800x600 xc:$CANVAS $FACE $TIMESIZE -gravity center -draw "text $ALIGN '$H:$M' " $OUT
     else
-        convert -size 800x600 xc:$CANVAS $FACE $TIMESIZE -gravity center -draw "text $ALIGN '$H:$M' " $FACE $WEATHERSIZE -gravity northwest -draw "text +20,+20 '$TEMP°C' " $DATESIZE -gravity southeast -draw "text +20,+20 '$TODAY' " $OUT
+        convert -size 800x600 xc:$CANVAS $FACE $TIMESIZE -gravity center -draw "text $ALIGN '$H:$M' " $FACE $WEATHERSIZE -gravity northwest -draw "text +100,+15 '$TEMP°C' " $DATESIZE -gravity southeast -draw "text +20,+20 '$TODAY' " $OUT
+        composite $WEATHERICON -gravity northwest /tmp/display.bmp /tmp/display_w.bmp
+        mv /tmp/display_w.bmp /tmp/display.bmp
     fi
 }
 
@@ -278,5 +281,4 @@ else
         ANALOGUE
     fi
 fi
-
 
