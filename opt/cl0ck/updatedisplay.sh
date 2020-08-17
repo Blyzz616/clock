@@ -21,14 +21,14 @@ WEATHER() {
     CLOUDS=$(echo $OPENWEATHER | egrep -o 'description\":\"[a-zA-Z ]*' | awk -F: '{print $2}' | cut -c2-)
     ICON=$(echo $OPENWEATHER | egrep -o 'icon\":\"[a-z0-9]*' | awk -F: '{print $2}' | cut -c2-)
 
-    echo "TEMP = $TEMP" > /opt/cl0ck/weather/weather.dump
-    echo "FEELSLIKE = $FEELSLIKE" >> /opt/cl0ck/weather/weather.dump
-    echo "TMIN = $TMIN" >> /opt/cl0ck/weather/weather.dump
-    echo "TMAX = $TMAX" >> /opt/cl0ck/weather/weather.dump
+    echo "TEMP = $TEMP°C" > /opt/cl0ck/weather/weather.dump
+    echo "FEELSLIKE = $FEELSLIKE°C" >> /opt/cl0ck/weather/weather.dump
+    echo "TMIN = $TMIN°C" >> /opt/cl0ck/weather/weather.dump
+    echo "TMAX = $TMAX°C" >> /opt/cl0ck/weather/weather.dump
     echo "PRESSURE = $PRESSURE" >> /opt/cl0ck/weather/weather.dump
     echo "HUMIDITY = $HUMIDITY" >> /opt/cl0ck/weather/weather.dump
     echo "WINDSPEED = $WINDSPEED" >> /opt/cl0ck/weather/weather.dump
-    echo "WINDBEARING = $WINDBEARING" >> /opt/cl0ck/weather/weather.dump
+    echo "WINDBEARING = $WINDBEARING°" >> /opt/cl0ck/weather/weather.dump
     echo "SUNRISE = $SUNRISE" >> /opt/cl0ck/weather/weather.dump
     echo "SUNSET = $SUNSET" >> /opt/cl0ck/weather/weather.dump
     echo "CLOUDS = $CLOUDS" >> /opt/cl0ck/weather/weather.dump
@@ -56,9 +56,13 @@ fi
 # FONT SIZES
 TIMESIZE="-pointsize 300"
 DATESIZE="-pointsize 50"
+WEATHERSIZE="-pointsize 100"
 
 # WHAT DATE TO DISPLAY
-DATEFORMAT=$( cat /etc/cl0ck/settings.json | grep dateformat | awk -F: '{print $2}')
+DATEFORMAT=$(cat /etc/cl0ck/settings.json | grep dateformat | awk -F: '{print $2}')
+
+# WHAT SORT OF WEATHER TO DISPLAY
+SHOWWEATHER=$(cat /etc/cl0ck/settings.json | grep weather | awk -F: '{print $2}')
 
 # WHERE THE OUTPUT WILL BE SENT
 OUT="/tmp/display.bmp"
@@ -108,6 +112,8 @@ else
     HANDS="-stroke white"
 fi
 
+
+
 ### MIGHT NEED TO UPDATE THE DATE FOR THE PRE-DATE SHIFT (00:00)
 # SET DATE FORMAT
 if [[ $DATEFORMAT = "full"  ]];
@@ -137,7 +143,7 @@ function DIGITAL() {
     then
         convert -size 800x600 xc:$CANVAS $FACE $TIMESIZE -gravity center -draw "text $ALIGN '$H:$M' " $OUT
     else
-        convert -size 800x600 xc:$CANVAS $FACE $TIMESIZE -gravity center -draw "text $ALIGN '$H:$M' " $FACE $DATESIZE -gravity southeast -draw "text -20,+20 '$TODAY' " $OUT
+        convert -size 800x600 xc:$CANVAS $FACE $TIMESIZE -gravity center -draw "text $ALIGN '$H:$M' " $FACE $DATESIZE -gravity southeast -draw "text +20,+20 '$TODAY' " $FACE $WEATHERSIZE -gravity northwest -draw "text 0,0 ' $TEMP '" $OUT
     fi
 }
 
@@ -273,4 +279,3 @@ else
 fi
 
 WEATHER
-
