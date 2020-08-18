@@ -5,6 +5,49 @@
     #/IT8951/IT8951 0 0 /tmp/display.bmp
 #}
 
+# SET HEADERS IN CSV FILES
+echo "HOUR" > /opt/cl0ck/weather/times.csv
+echo "TEMP" > /opt/cl0ck/weather/temps.csv
+
+# GET HOURLY INFO
+curl -s "https://api.openweathermap.org/data/2.5/onecall?lat=49.05&lon=-122.29&exclude=current,minutely,daily&appid=12cf76465a58356df52c88853dbfe100&units=metric" > /opt/cl0ck/weather/hourly.out
+
+function FORECAST() {
+    FOREDATE=$(cat /opt/cl0ck/weather/hourly.out | egrep -o '\{\"dt\"\:[0-9]*' | awk -F: '{print $2}')
+    FORETEMP=$(cat /opt/cl0ck/weather/hourly.out | egrep -o '\"temp\"\:[0-9.-]*' | awk -F: '{print $2}')
+for i in $FOREDATE;
+do
+    echo $(date -d @$i +%H:%M) >> /opt/cl0ck/weather/times.csv
+done
+for i in $FORETEMP;
+do
+    echo $i >> /opt/cl0ck/weather/temps.csv
+done
+
+    paste -d , /opt/cl0ck/weather/times.csv /opt/cl0ck/weather/temps.csv > /opt/cl0ck/weather/ready.csv
+
+    sed -i -e 's/01:00/ /g' /opt/cl0ck/weather/ready.csv
+    sed -i -e 's/02:00/ /g' /opt/cl0ck/weather/ready.csv
+    sed -i -e 's/03:00/ /g' /opt/cl0ck/weather/ready.csv
+    sed -i -e 's/04:00/ /g' /opt/cl0ck/weather/ready.csv
+    sed -i -e 's/05:00/ /g' /opt/cl0ck/weather/ready.csv
+    sed -i -e 's/07:00/ /g' /opt/cl0ck/weather/ready.csv
+    sed -i -e 's/08:00/ /g' /opt/cl0ck/weather/ready.csv
+    sed -i -e 's/09:00/ /g' /opt/cl0ck/weather/ready.csv
+    sed -i -e 's/10:00/ /g' /opt/cl0ck/weather/ready.csv
+    sed -i -e 's/11:00/ /g' /opt/cl0ck/weather/ready.csv
+    sed -i -e 's/13:00/ /g' /opt/cl0ck/weather/ready.csv
+    sed -i -e 's/14:00/ /g' /opt/cl0ck/weather/ready.csv
+    sed -i -e 's/15:00/ /g' /opt/cl0ck/weather/ready.csv
+    sed -i -e 's/16:00/ /g' /opt/cl0ck/weather/ready.csv
+    sed -i -e 's/17:00/ /g' /opt/cl0ck/weather/ready.csv
+    sed -i -e 's/19:00/ /g' /opt/cl0ck/weather/ready.csv
+    sed -i -e 's/20:00/ /g' /opt/cl0ck/weather/ready.csv
+    sed -i -e 's/21:00/ /g' /opt/cl0ck/weather/ready.csv
+    sed -i -e 's/22:00/ /g' /opt/cl0ck/weather/ready.csv
+    sed -i -e 's/23:00/ /g' /opt/cl0ck/weather/ready.csv
+}
+
 WEATHER() {
     curl -s "http://api.openweathermap.org/data/2.5/weather?id=5881792&units=metric&appid=12cf76465a58356df52c88853dbfe100" > /opt/cl0ck/weather/now.json
     OPENWEATHER=$(cat /opt/cl0ck/weather/now.json)
@@ -36,6 +79,7 @@ WEATHER() {
     WEATHERICON="/opt/cl0ck/weather/img/$ICON.bmp"
 }
 WEATHER
+FORECAST
 
 # WAS THE CL0CK RECENTLY REBOOTED?
 READY=$(cat /opt/cl0ck/status.rdy)
