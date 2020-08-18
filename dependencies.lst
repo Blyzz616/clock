@@ -18,3 +18,6 @@ sudo su
 sed -i /s// /etc/ssh/ssh
 
 Dependencies:
+bc
+imagemagick
+gnuplot
