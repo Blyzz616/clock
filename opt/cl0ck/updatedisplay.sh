@@ -1,9 +1,9 @@
 #! /bin/bash
 
-#UPDATE() {
+UPDATE() {
     # SEND IMAGE TO DISPLAY
-    #/IT8951/IT8951 0 0 /tmp/display.bmp
-#}
+    /IT8951/IT8951 0 0 /tmp/display.bmp
+}
 
 # SET HEADERS IN CSV FILES
 echo "HOUR" > /opt/cl0ck/weather/times.csv
@@ -13,19 +13,23 @@ echo "TEMP" > /opt/cl0ck/weather/temps.csv
 curl -s "https://api.openweathermap.org/data/2.5/onecall?lat=49.05&lon=-122.29&exclude=current,minutely,daily&appid=12cf76465a58356df52c88853dbfe100&units=metric" > /opt/cl0ck/weather/hourly.out
 
 function FORECAST() {
+    # GET THE TIMES AND TEMPS FROM THE FILE
     FOREDATE=$(cat /opt/cl0ck/weather/hourly.out | egrep -o '\{\"dt\"\:[0-9]*' | awk -F: '{print $2}')
     FORETEMP=$(cat /opt/cl0ck/weather/hourly.out | egrep -o '\"temp\"\:[0-9.-]*' | awk -F: '{print $2}')
 for i in $FOREDATE;
 do
+    # WRITE THE TIMES TO A FILE
     echo $(date -d @$i +%H:%M) >> /opt/cl0ck/weather/times.csv
 done
 for i in $FORETEMP;
 do
+    # WRITE THE TEMPS TO A FILE
     echo $i >> /opt/cl0ck/weather/temps.csv
 done
-
+    # MERGE TIMES AND TEMPS INTO ONE FILE
     paste -d , /opt/cl0ck/weather/times.csv /opt/cl0ck/weather/temps.csv > /opt/cl0ck/weather/ready.csv
 
+    # REMOVE ALL THE HOURS THAT AREN'T 0,6,12,18
     sed -i -e 's/01:00/ /g' /opt/cl0ck/weather/ready.csv
     sed -i -e 's/02:00/ /g' /opt/cl0ck/weather/ready.csv
     sed -i -e 's/03:00/ /g' /opt/cl0ck/weather/ready.csv
@@ -46,6 +50,12 @@ done
     sed -i -e 's/21:00/ /g' /opt/cl0ck/weather/ready.csv
     sed -i -e 's/22:00/ /g' /opt/cl0ck/weather/ready.csv
     sed -i -e 's/23:00/ /g' /opt/cl0ck/weather/ready.csv
+    
+    # DRAW THE GRAPH
+    gnuplot /opt/cl0ck/weather/usage.plot > /opt/cl0ck/weather/foregraph.jpg
+    
+    # CROP THE GRAPH
+    mogrify -crop 578x148+18+170 /opt/cl0ck/weather/foregraph.jpg
 }
 
 WEATHER() {
@@ -191,7 +201,9 @@ function DIGITAL() {
     else
         convert -size 800x600 xc:$CANVAS $FACE $TIMESIZE -gravity center -draw "text $ALIGN '$H:$M' " $FACE $WEATHERSIZE -gravity northwest -draw "text +100,+15 '$TEMP°C' " $DATESIZE -gravity southeast -draw "text +20,+20 '$TODAY' " $OUT
         composite $WEATHERICON -gravity northwest /tmp/display.bmp /tmp/display_w.bmp
-        mv /tmp/display_w.bmp /tmp/display.bmp
+        composite /opt/cl0ck/weather/foregraph.jpg -gravity northeast /tmp/display_g.bmp
+        rm /tmp/display_w.bmp
+        mv /tmp/display_g.bmp /tmp/display.bmp
     fi
 }
 
