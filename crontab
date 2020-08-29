@@ -1,1 +1,1 @@
-* * * * * /opt/cl0ck/update.sh
+* * * * * /opt/cl0ck/updatedisplay.sh 2 >> /var/log/cl0ck.err
