@@ -8,26 +8,43 @@ UPDATE() {
 # SET HEADERS IN CSV FILES
 echo "HOUR" > /opt/cl0ck/weather/times.csv
 echo "TEMP" > /opt/cl0ck/weather/temps.csv
+echo "RAIN" > /opt/cl0ck/weather/rains.tmp
+touch /tmp/hourly.out
 
 # GET HOURLY INFO
-curl -s "https://api.openweathermap.org/data/2.5/onecall?lat=49.05&lon=-122.29&exclude=current,minutely,daily&appid=12cf76465a58356df52c88853dbfe100&units=metric" > /opt/cl0ck/weather/hourly.out
 
 function FORECAST() {
+
+    curl -s "https://api.openweathermap.org/data/2.5/onecall?lat=49.05&lon=-122.29&exclude=current,minutely,daily&appid=12cf76465a58356df52c88853dbfe100&units=metric" > /tmp/hourly.out
+
     # GET THE TIMES AND TEMPS FROM THE FILE
-    FOREDATE=$(cat /opt/cl0ck/weather/hourly.out | egrep -o '\{\"dt\"\:[0-9]*' | awk -F: '{print $2}')
-    FORETEMP=$(cat /opt/cl0ck/weather/hourly.out | egrep -o '\"temp\"\:[0-9.-]*' | awk -F: '{print $2}')
+    FOREDATE=$(cat /tmp/hourly.out | egrep -o '\{\"dt\"\:[0-9]*' | awk -F: '{print $2}')
+    FORETEMP=$(cat /tmp/hourly.out | egrep -o '\"temp\"\:[0-9.-]*' | awk -F: '{print $2}')
+    FORERAIN=$(cat /tmp/hourly.out | egrep -o 'pop\":[0-9\.]+(,\"rain\":\{\"1h\":[0-9\.]+)?')
+
 for i in $FOREDATE;
 do
     # WRITE THE TIMES TO A FILE
     echo $(date -d @$i +%H:%M) >> /opt/cl0ck/weather/times.csv
 done
+
 for i in $FORETEMP;
 do
     # WRITE THE TEMPS TO A FILE
     echo $i >> /opt/cl0ck/weather/temps.csv
 done
+
+for i in $FORERAIN;
+do
+    # WRITE THE RAINS TO A FILE
+    echo $i >> /opt/cl0ck/weather/rains.tmp
+done
+
+# CODE HERE TO CLEAN UP THE RAINS.CSV
+cat /opt/cl0ck/weather/rains.tmp | awk -F: '{print $4}' > /opt/cl0ck/weather/rains.csv
+
     # MERGE TIMES AND TEMPS INTO ONE FILE
-    paste -d , /opt/cl0ck/weather/times.csv /opt/cl0ck/weather/temps.csv > /opt/cl0ck/weather/ready.csv
+    paste -d , /opt/cl0ck/weather/times.csv /opt/cl0ck/weather/temps.csv /opt/cl0ck/weather/rains.csv > /opt/cl0ck/weather/ready.csv
 
     # REMOVE ALL THE HOURS THAT AREN'T 0,6,12,18
     sed -i -e 's/01:00/ /g' /opt/cl0ck/weather/ready.csv
@@ -50,16 +67,17 @@ done
     sed -i -e 's/21:00/ /g' /opt/cl0ck/weather/ready.csv
     sed -i -e 's/22:00/ /g' /opt/cl0ck/weather/ready.csv
     sed -i -e 's/23:00/ /g' /opt/cl0ck/weather/ready.csv
-    
+
     # DRAW THE GRAPH
     gnuplot /opt/cl0ck/weather/usage.plot > /opt/cl0ck/weather/foregraph.jpg
-    
+
     # CROP THE GRAPH
     mogrify -crop 578x148+18+170 /opt/cl0ck/weather/foregraph.jpg
 }
 
 WEATHER() {
     curl -s "http://api.openweathermap.org/data/2.5/weather?id=5881792&units=metric&appid=12cf76465a58356df52c88853dbfe100" > /opt/cl0ck/weather/now.json
+
     OPENWEATHER=$(cat /opt/cl0ck/weather/now.json)
     TEMP=$(echo $OPENWEATHER | egrep -o 'temp\":[0-9.]*' | awk -F: '{print $2}' | awk '{print ($0-int($0)<0.499)?int($0):int($0)+1}')
     FEELSLIKE=$(echo $OPENWEATHER | egrep -o 'feels\_like\":[0-9.]*' | awk -F: '{print $2}' | awk '{print ($0-int($0)<0.499)?int($0):int($0)+1}')
@@ -74,7 +92,7 @@ WEATHER() {
     CLOUDS=$(echo $OPENWEATHER | egrep -o 'description\":\"[a-zA-Z ]*' | awk -F: '{print $2}' | cut -c2-)
     ICON=$(echo $OPENWEATHER | egrep -o 'icon\":\"[a-z0-9]*' | awk -F: '{print $2}' | cut -c2-)
 
-    echo "TEMP = $TEMP°C" > /opt/cl0ck/weather/weather.dump
+    echo "TEMP = $TEMP°" > /opt/cl0ck/weather/weather.dump
     echo "FEELSLIKE = $FEELSLIKE°C" >> /opt/cl0ck/weather/weather.dump
     echo "TMIN = $TMIN°C" >> /opt/cl0ck/weather/weather.dump
     echo "TMAX = $TMAX°C" >> /opt/cl0ck/weather/weather.dump
@@ -88,8 +106,17 @@ WEATHER() {
     echo "ICON = $ICON" >> /opt/cl0ck/weather/weather.dump
     WEATHERICON="/opt/cl0ck/weather/img/$ICON.bmp"
 }
+
 WEATHER
-FORECAST
+    if [[ $(date +%M) = 00 ]];
+    then
+	FORECAST
+    elif [[ -s /tmp/hourly.out ]];
+    then
+	FORECAST
+    fi
+
+
 
 # WAS THE CL0CK RECENTLY REBOOTED?
 READY=$(cat /opt/cl0ck/status.rdy)
@@ -107,7 +134,7 @@ if [[ $FACE = "Digital-7-MonoItalic" ]];
 then
     ALIGN="0,-50"
 else
-    ALIGN="0,0"
+    ALIGN="0,30"
 fi
 # FONT SIZES
 TIMESIZE="-pointsize 300"
@@ -168,8 +195,6 @@ else
     HANDS="-stroke white"
 fi
 
-
-
 ### MIGHT NEED TO UPDATE THE DATE FOR THE PRE-DATE SHIFT (00:00)
 # SET DATE FORMAT
 if [[ $DATEFORMAT = "full"  ]];
@@ -199,9 +224,9 @@ function DIGITAL() {
     then
         convert -size 800x600 xc:$CANVAS $FACE $TIMESIZE -gravity center -draw "text $ALIGN '$H:$M' " $OUT
     else
-        convert -size 800x600 xc:$CANVAS $FACE $TIMESIZE -gravity center -draw "text $ALIGN '$H:$M' " $FACE $WEATHERSIZE -gravity northwest -draw "text +100,+15 '$TEMP°C' " $DATESIZE -gravity southeast -draw "text +20,+20 '$TODAY' " $OUT
+convert -size 800x600 xc:$CANVAS $FACE $TIMESIZE -gravity center -draw "text $ALIGN '$H:$M' " $FACE $WEATHERSIZE -gravity northwest -draw "text +100,+15 '$TEMP°' " $DATESIZE -gravity southeast -draw "text +20,+20 '$TODAY' " $OUT
         composite $WEATHERICON -gravity northwest /tmp/display.bmp /tmp/display_w.bmp
-        composite /opt/cl0ck/weather/foregraph.jpg -gravity northeast /tmp/display_g.bmp
+        composite /opt/cl0ck/weather/foregraph.jpg -gravity northeast /tmp/display_w.bmp /tmp/display_g.bmp
         rm /tmp/display_w.bmp
         mv /tmp/display_g.bmp /tmp/display.bmp
     fi
@@ -310,7 +335,7 @@ then
     fi
 
     # AND UPDATE IT
-    #UPDATE
+    UPDATE
     # THEN IMMEDIATELY PREP FOR NEXT UPDAT BY GETTING THE NEXT MINUTE
     MINUTEPLUS
     # AND FIGURING OUT THE CL0CK TYPE AND SAVING THE DISPLAY
@@ -326,7 +351,7 @@ then
 else
     # THIS IS WHAT HAPPENS IF WE HAVEN'T JUST REBOOTED
     # THERE SHOULD BE AN IMAGE READY TO GO
-    #UPDATE
+    UPDATE
     # SET THE TIME TO NEXT MINUTE
     MINUTEPLUS
     # WHAT CLOCK FACE ARE WE GOING TO USE?
