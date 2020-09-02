@@ -226,9 +226,8 @@ fi
 ### MIGHT NEED TO UPDATE THE DATE FOR THE PRE-DATE SHIFT (00:00)
 # SET DATE FORMAT
 if [[ $DATEFORMAT = "full"  ]];
-    TODAY=$(date +%A", "%B" "%d", "%Y)
 then
-    TODAY=$(date +%A", "%B" "%d", "%Y)
+    TODAY=$(date +%a", "%b" "%d", "%Y)
 elif [[ $DATEFORMAT = "yymmdd"  ]];
 then
     TODAY=$(date +%Y-%m-%d)
