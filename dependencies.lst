@@ -21,3 +21,13 @@ Dependencies:
 bc
 imagemagick
 gnuplot
+pip
+Mopidy-Spotify
+
+apt update -y
+apt upgrade -y
+apt install bc imagemagick gnuplot 
+wget -q -O - https://apt.mopidy.com/mopidy.gpg | sudo apt-key add -
+wget -q -O /etc/apt/sources.list.d/mopidy.list https://apt.mopidy.com/buster.list
+apt update
+apt install mopidy mopidy-spotify
