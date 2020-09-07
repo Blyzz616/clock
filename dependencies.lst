@@ -21,8 +21,7 @@ Dependencies:
 bc
 imagemagick
 gnuplot
-pip
-Mopidy-Spotify
+evtest
 
 apt update -y
 apt upgrade -y
