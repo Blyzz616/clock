@@ -1,42 +1,50 @@
-	1. Figure out the set-up initialisation process
-    		a. Set up a wifi internet connection
-		b. Have option to forego internet option (dumb clock)
-			i. Set Time
-		c. Set location
-			i. Timezone
-			ii. Country (optional - needed for weather)
-			iii. City (optional- needed for weather)
-		d. Information (telemetry) opt-in
-	
-	2. Interface
-		a. Default basic
-		b. Inverse
-		c. Additional designs
-			i.	Clock only
-			ii.	Weather forecast
-			
+When setting up internet cameras:
+you plug in the camera
+then you connect to the camera's wifi with another wifi capable device
+load up the web page on that wifi
+select the Wi-Fi AP name
+enter username
+enter password and hit OK
+
+My thinking is:
+on first boot - display 
+    "First boot - Acquiring Access point names"
+then display
+    "
+    connect to access point 'ClockAP'
+    open browser and load up http://setup/
+    "
+
+In that browser, there are 2 options:
+1: Internetless setup
+    Input time
+    select clock interface
+    Click "ok & reboot"
+    Display "Remember to forget this AP on your wifi device"
+maybe the clock reboots, and displays the time.
+(might need a reset button to factory reset the clock)
+2: Select the AP name for a list
+    Enter username
+    Enter Password
+    Enter location
+    Select Imperial/Metric
+    Select Clock Layout
+    telemetry opt-in
+    Click "ok & reboot"
+    Display "Reconnect your device to your wifi"
+
 	3. Button interface
-		a. up/down/left/right/enter/back
+		a. r-click, l-lick, middle-click
 			
 	3. Audio Alarm Clock
 		a. set freq
 		b. set alarm type
 		c. set radio alarm
-		d. use RED to indicate alarm going off
 		
 	4. Internet Radio
 		a. select from list
 		b. input own URL
 			
-	5. Get e-Ink working with SPI interface
-
-	6. Get weather update working
-		a. Weather now
-		b. Weather today (6-hour increments)
-		c. Weather 3-day forecast
-		d. Weather 3-day graph?
-		e. Weather 7-day?
-		
 	7. Get auto-update working
 		a. auto-update opt-out (opt-in?)
 		
@@ -50,9 +58,7 @@
 			i. user interfaces
 			ii. user settings
 
-	11. Is a backlight an option?
-	
-	-12. Use RED to indicate Daylight savings time change - NO RED-
+	12. Indicate Daylight savings time change
 	
 	13. Get pricing to mass-produce
 	
