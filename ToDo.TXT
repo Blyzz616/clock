@@ -9,11 +9,23 @@ enter password and hit OK
 My thinking is:
 on first boot - display 
     "First boot - Acquiring Access point names"
-then display
-    "
-    connect to access point 'ClockAP'
-    open browser and load up http://setup/
-    "
+then display QR code to join AP
+Once a new client is present; display QR code to site address
+(https://feeding.cloud.geek.nz/posts/encoding-wifi-access-point-passwords-qr-code/)
+
+Password generation
+pwgen -N1 -ncy -r ';' 20
+    Generates 1 passwd
+    includes numbers (-n)
+    includes uppercases (-c)
+    includes symbols (-y)
+    excludes semicolons (-r ;) -iOS problem
+    with 20 chars (20) - to keep the resolution down a bit
+
+QR Code Generation
+qrencode -s10 -o /tmp/wifi.png "WIFI:T:WPA;S:'<SSID>';P:<PASSWORD>;;"
+    Draws large blocks (-s10)
+    Sets output file (-o /tmp/wifi.png)
 
 In that browser, there are 2 options:
 1: Internetless setup
