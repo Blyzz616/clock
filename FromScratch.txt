@@ -1,0 +1,8 @@
+burn OS to card
+access /boot/
+create ssh file
+
+check 
+
+
+pi:raspberry
