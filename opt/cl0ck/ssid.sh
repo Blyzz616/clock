@@ -34,6 +34,7 @@ SCAN() {
     awk '{print $NF " " $0}' /tmp/tosort.lst | sort -n -r -k1 | sed 's/^[0-9][0-9]* //' > /tmp/scan-$i.lst
 }
 
+# I FIND THAT SCANNING MORE TIMES BRINGS UP MORE APs
 for i in 1 2 3 4 5 6 7 8 9
 do
     SCAN
