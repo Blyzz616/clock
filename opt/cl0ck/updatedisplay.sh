@@ -2,22 +2,18 @@
 
 CPATH=/opt/cl0ck
 WPATH=/opt/cl0ck/weather
+LOG=/var/log/cl0ck.log
 
 touch $WPATH/clouds.csv
 touch $WPATH/hourly.out
 touch $WPATH/hourstemps.csv
 touch $WPATH/now.json
-touch $WPATH/owmapi.log
-touch $WPATH/rains.csv
-touch $WPATH/rains.tmp
 touch $WPATH/ready.csv
-touch $WPATH/temps.csv
-touch $WPATH/times.csv
 touch $WPATH/weather.dump
-LOGDATE=$(date +%y%m%d)
-touch /var/log/cl0ck$LOGDATE.log
+#LOGDATE=$(date +%y%m%d)
+touch $LOG
 
-echo -e "\n\n\n\n NEW LOG - $(date +%H:%M)" >> /var/log/cl0ck$LOGDATE.log
+echo -e "***** NEW LOG - $(date +%c) *****" >> $LOG
 
 # WAS THE CL0CK RECENTLY REBOOTED?
 READY=$(cat /opt/cl0ck/status.rdy)
@@ -50,8 +46,9 @@ OUT="/tmp/display.bmp"
 
 UPDATE() {
     # SEND IMAGE TO DISPLAY
-    echo "sending update to display" >> /var/log/cl0ck$LOGDATE.log
-    /IT8951/IT8951 0 0 /tmp/display.bmp
+    echo "Sending update to display" >> $LOG
+    /IT8951/IT8951 0 0 $OUT
+    echo -e "Update sent to display\n***** DONE  - $(date +%c) *****\n\n" >> $LOG
 }
 
 # SOMETIMES THE UPDATE DOESN'T COMPLETE, WHEN THIS HAPPENS THE IT8951 PROCESS STAYS OPEN
@@ -61,7 +58,7 @@ UPDATE() {
 CLEAN() {
     if [[ $(ps aux | grep IT8951 | grep -v grep | awk '{print $2}' | wc -l) -gt 3 ]];
     then
-        echo "Cleaning update processes" >> /var/log/cl0ck$LOGDATE.log
+        echo "Cleaning update processes" >> $LOG
         for p in $(ps aux | grep IT8951 | grep -v grep | awk '{print $2}');
         do
             kill -9 $p
@@ -74,66 +71,85 @@ CLEAN
 # GET HOURLY INFO (EVERY 5 MINUTES)
 FORECAST() {
     curl -s "https://api.openweathermap.org/data/2.5/onecall?lat=49.05&lon=-122.29&exclude=current,minutely,daily&appid=12cf76465a58356df52c88853dbfe100&units=metric" > /tmp/hourly.out
-    echo $(date '+%Y-%m-%d %H:%M') >> $WPATH/owmapi.log
-    echo "Curled onecall from owm" >> /var/log/cl0ck$LOGDATE.log
+    echo "Curled onecall from owm" >> $LOG
 
     # MAKE SURE THAT THE FILES ARE THERE AND READY
     rm $WPATH/times.csv
     touch $WPATH/times.csv
     rm $WPATH/temps.csv
     touch $WPATH/temps.csv
-    rm $WPATH/rains.tmp
-    touch $WPATH/rains.tmp
+#    rm $WPATH/rains.tmp
+#    touch $WPATH/rains.tmp
     rm $WPATH/rains.csv
     touch $WPATH/rains.csv
     rm $WPATH/clouds.csv
     touch $WPATH/clouds.csv
-    touch /tmp/hourly.out
+    rm $WPATH/temprange.tmp
+    touch $WPATH/temprange.tmp
 
     # GET THE TIMES AND TEMPS FROM THE FILE
     FOREDATE=$(cat /tmp/hourly.out | egrep -o '\{\"dt\"\:[0-9]*' | awk -F: '{print $2}')
+    echo "Assigned values to FOREDATE variable" >> $LOG
     FORETEMP=$(cat /tmp/hourly.out | egrep -o '\"temp\"\:[0-9.-]*' | awk -F: '{print $2}')
+    echo "Assigned values to FORETEMP variable" >> $LOG
     FORERAIN=$(cat /tmp/hourly.out | egrep -o 'pop\":[0-9\.]+(,\"rain\":\{\"1h\":[0-9\.]+)?')
+    echo "Assigned values to FORERAIN variable" >> $LOG
     FORECLOUD=$(cat /tmp/hourly.out | egrep -o '\"clouds\":[0-9]+' | awk -F: '{print $2}')
+    echo "Assigned values to FORECLOUD variable" >> $LOG
 
-echo "Setting FOREDATE" >> /var/log/cl0ck$LOGDATE.log
+echo "Setting FOREDATE" >> $LOG
 for i in $FOREDATE;
 do
     # WRITE THE TIMES TO A FILE
     echo $(date -d @$i +%H:%M) >> $WPATH/times.csv
 done
+echo "Wrote $(cat /$WPATH/times.csv | wc -l) lines to $WPATH/times.csv (expect 48)" >>$LOG
 
-echo "Setting FORETEMP" >> /var/log/cl0ck$LOGDATE.log
+echo "Setting FORETEMP" >> $LOG
 for i in $FORETEMP;
 do
     # WRITE THE TEMPS TO A FILE
     echo $i >> $WPATH/temps.csv
 done
+echo "Wrote $(cat /$WPATH/temps.csv | wc -l) lines to $WPATH/temps.csv (expect 48)" >>$LOG
 
-echo "Setting FORERAIN" >> /var/log/cl0ck$LOGDATE.log
+echo "Setting FORERAIN" >> $LOG
 for i in $FORERAIN;
 do
     # WRITE THE RAINS TO A FILE
-    echo $i >> $WPATH/rains.tmp
+    if [[ $(echo $i | awk -F: '{print $4}') = "" ]];
+    then
+        echo "0" >> $WPATH/rains.csv
+    else
+        echo $i | awk -F: '{print $4}' >> $WPATH/rains.csv
+    fi
 done
+echo "Wrote $(cat /$WPATH/rains.csv | wc -l) lines to $WPATH/rains.csv (expect 1 or 48)" >>$LOG
 
-echo "Setting FORECLOUD" >> /var/log/cl0ck$LOGDATE.log
+echo "Setting FORECLOUD" >> $LOG
 for i in $FORECLOUD;
 do
     #WRITE THE CLOUDS TO A FILE
     echo $i >> $WPATH/clouds.csv
 done
+echo "Wrote $(cat /$WPATH/clouds.csv | wc -l) lines to $WPATH/clous.csv (expect 48)" >>$LOG
 
 # HOW MANY NUMBERS TO SHOW ON Y1AXIS
 # GET MAX TEMP
-TEMPMAX=$(printf "%.0f\n" $(cat /opt/cl0ck/weather/temps.csv | sort -u | tail -n1))
-# GET MIN TEMP
-TEMPMIN=$(printf "%.0f\n" $(cat /opt/cl0ck/weather/temps.csv | sort -u | head -n1))
-TEMPDIFF=$(expr $TEMPMAX - $TEMPMIN)
-echo "TEMPDIFF = $TEMPDIFF" >> /var/log/cl0ck$LOGDATE.log
+for i in $(cat $WPATH/temps.csv);
+do
+    echo $i \* 100 | bc -l | awk -F. '{print $1}' >> $WPATH/temprange.tmp
+done
 
-echo "Cleaning up rain.tmp to rains.csv" >> /var/log/cl0ck$LOGDATE.log
-cat $WPATH/rains.tmp | awk -F: '{print $4}' >> $WPATH/rains.csv
+TEMPMAX=$(cat $WPATH/temprange.tmp | sort -n | tail -n1)
+# GET MIN TEMP
+TEMPMIN=$(cat $WPATH/temprange.tmp | sort -n | head -n1)
+PRETEMPDIFF=$(echo $TEMPMAX - $TEMPMIN | bc -l)
+TEMPDIFF=$(echo "$PRETEMPDIFF / 100" | bc -l | awk -F. '{print $1}')
+echo "TEMPDIFF = $TEMPDIFF" >> $LOG
+
+#echo "Cleaning up rains.tmp to rains.csv" >> $LOG
+#cat $WPATH/rains.tmp | awk -F: '{print $4}' >> $WPATH/rains.csv
 
     # REMOVE ALL THE HOURS THAT AREN'T 0,6,12,18
     sed -i -e 's/01:00/ /g' $WPATH/times.csv
@@ -163,71 +179,86 @@ cat $WPATH/rains.tmp | awk -F: '{print $4}' >> $WPATH/rains.csv
     sed -i -e 's/^[[:blank:]]*$/0/g' $WPATH/quarter.csv
 
     # MERGE TIMES, TEMPS, RAINS, CLOUDS AND MARKERS INTO ONE FILE
-    echo -e "Pasting \n1) times\n2) temps\n3) rains\n4) clouds\n5) quarter\n to ready.csv" >> /var/log/cl0ck$LOGDATE.log
+    echo -e "Pasting \n1) times\n2) temps\n3) rains\n4) clouds\n5) quarter\n to ready.csv" >> $LOG
     paste -d , $WPATH/times.csv $WPATH/temps.csv $WPATH/rains.csv $WPATH/clouds.csv $WPATH/quarter.csv > $WPATH/ready.csv
 
     # DRAW THE GRAPH
-    echo "Getting RAINMAX" >> /var/log/cl0ck$LOGDATE.log
+    echo "Getting RAINMAX" >> $LOG
     RAINMAX=$(cat $WPATH/ready.csv | awk -F, '{print $3}' | sort -un | tail -n1)
-    echo "RAINMAX = $RAINMAX" >> /var/log/cl0ck$LOGDATE.log
+    echo "RAINMAX = $RAINMAX" >> $LOG
+    RAINLVL=$(echo "$RAINMAX /* 100 | bc -l")
 
 if [[ $TEMPDIFF -le 10 ]];
 then
-    echo "TEMPDIFF <= 10" >> /var/log/cl0ck$LOGDATE.log
-    if (( $(echo "$RAINMAX < 1" | bc -l) ));
+    echo "TEMPDIFF <= 10" >> $LOG
+    TD=""
+    if [[ $RAINLVL = 0 ]];
     then
-    echo "    and RAINMAX < 1" >> /var/log/cl0ck$LOGDATE.log
-    gnuplot $WPATH/usage1.plot > $WPATH/foregraph.png
-    elif (( $(echo "$RAINMAX < 5" | bc -l) ));
+        RM="0"
+#        echo -e "    and RAINMAX = 0\n    using usage0.plot" >> $LOG
+    elif (( $(echo "$RAINLVL < 100" | bc -l) ));
     then
-    echo "    and RAINMAX < 5" >> /var/log/cl0ck$LOGDATE.log
-    gnuplot $WPATH/usage5.plot > $WPATH/foregraph.png
-    elif (( $(echo "$RAINMAX < 10" | bc -l) ));
+        RM="1"
+#        echo -e "    and RAINMAX < 1\n    using usage1.plot" >> $LOG
+    elif (( $(echo "$RAINLVL < 500" | bc -l) ));
     then
-    echo "    and RAINMAX < 10" >> /var/log/cl0ck$LOGDATE.log
-    gnuplot $WPATH/usage10.plot > $WPATH/foregraph.png
-    elif (( $(echo "$RAINMAX < 20" | bc -l) ));
+        RM="5"
+#        echo -e "    and RAINMAX < 5\n    using usage5.plot" >> $LOG
+    elif (( $(echo "$RAINLVL < 1000" | bc -l) ));
     then
-    echo "    and RAINMAX < 20" >> /var/log/cl0ck$LOGDATE.log
-    gnuplot $WPATH/usage20.plot > $WPATH/foregraph.png
+        RM="10"
+#        echo -e "    and RAINMAX < 10\n    using usage10.plot" >> $LOG
+    elif (( $(echo "$RAINLVL < 2000" | bc -l) ));
+    then
+        RM="20"
+#        echo -e "    and RAINMAX < 20\n    using usage20.plot" >> $LOG
     else
-    echo "    and RAINMAX > 20" >> /var/log/cl0ck$LOGDATE.log
-    gnuplot $WPATH/usage.plot > $WPATH/foregraph.png
+        RM=""
+#        echo -e "    and RAINMAX > 20\n    using usage.plot" >> $LOG
     fi
 else
-    echo "TEMPDIFF > 10" >> /var/log/cl0ck$LOGDATE.log
-    if (( $(echo "$RAINMAX < 1" | bc -l) ));
+    echo "TEMPDIFF > 10" >> $LOG
+    TD="-20"
+    if [[ $RAINLVL = 0 ]];
     then
-    echo "    and RAINMAX < 1" >> /var/log/cl0ck$LOGDATE.log
-    gnuplot $WPATH/usage1-20.plot > $WPATH/foregraph.png
-    elif (( $(echo "$RAINMAX < 5" | bc -l) ));
+        RM="0"
+#        echo -e "    and RAINMAX = 0\n    using usage0-20.plot" >> $LOG
+    elif (( $(echo "$RAINLVL < 100" | bc -l) ));
     then
-    echo "    and RAINMAX < 5" >> /var/log/cl0ck$LOGDATE.log
-    gnuplot $WPATH/usage5-20.plot > $WPATH/foregraph.png
-    elif (( $(echo "$RAINMAX < 10" | bc -l) ));
+        RM="1"
+#        echo -e "    and RAINMAX < 1\n    using usage1-20.plot" >> $LOG
+    elif (( $(echo "$RAINLVL < 500" | bc -l) ));
     then
-    echo "    and RAINMAX < 10" >> /var/log/cl0ck$LOGDATE.log
-    gnuplot $WPATH/usage10-20.plot > $WPATH/foregraph.png
-    elif (( $(echo "$RAINMAX < 20" | bc -l) ));
+        RM="5"
+#        echo -e "    and RAINMAX < 5\n    using usage5-20.plot" >> $LOG
+    elif (( $(echo "$RAINLVL < 1000" | bc -l) ));
     then
-    echo "    and RAINMAX < 20" >> /var/log/cl0ck$LOGDATE.log
-    gnuplot $WPATH/usage20-20.plot > $WPATH/foregraph.png
+        RM="10"
+#        echo -e "    and RAINMAX < 10\n    using usage10-20.plot" >> $LOG
+    elif (( $(echo "$RAINLVL < 2000" | bc -l) ));
+    then
+        RM="20"
+#        echo -e "    and RAINMAX < 20\n    using usage20-20.plot" >> $LOG
     else
-    echo "    and RAINMAX > 20" >> /var/log/cl0ck$LOGDATE.log
-    gnuplot $WPATH/usage-20.plot > $WPATH/foregraph.png
+        RM=""
+#        echo -e "    and RAINMAX > 20\n    using usage-20.plot" >> $LOG
     fi
 fi
 
+# DRAW THE GRAPH USING THE CORRECT SCALES
+#echo -e "    and RAINMAX > 20\n    using usage$RM$TD.plot" >> $LOG
+gnuplot $WPATH/usage$RM$TD.plot > /tmp/foregraph.png
+
     # CROP THE GRAPH
-    echo "Cropping Graph" >> /var/log/cl0ck$LOGDATE.log
-    mogrify -crop 554x147+14+317 $WPATH/foregraph.png
+    echo "Cropping Graph" >> $LOG
+    mogrify -crop 554x147+14+317 /tmp/foregraph.png
 }
 
 WEATHER() {
-    echo "Curling Current conditions" >> /var/log/cl0ck$LOGDATE.log
+    echo "Curling Current conditions" >> $LOG
     curl -s "http://api.openweathermap.org/data/2.5/weather?id=5881792&units=metric&appid=12cf76465a58356df52c88853dbfe100" > $WPATH/now.json
 
-    echo "Populating variables for all current conditions" >> /var/log/cl0ck$LOGDATE.log
+    echo "Populating variables for all current conditions" >> $LOG
     OPENWEATHER=$(cat $WPATH/now.json)
     TEMP="$(echo $OPENWEATHER | egrep -o 'temp\":[0-9.]*' | awk -F: '{print $2}' | awk '{print ($0-int($0)<0.499)?int($0):int($0)+1}')°"
     FEELSLIKE=$(echo $OPENWEATHER | egrep -o 'feels\_like\":[0-9.]*' | awk -F: '{print $2}' | awk '{print ($0-int($0)<0.499)?int($0):int($0)+1}')
@@ -266,11 +297,11 @@ WEATHER
 
 if [[ $(expr $(date +%M) % 5) -eq 0 ]];
 then
-    echo "Time is = divisible by 5 - getting forecast" >> /var/log/cl0ck$LOGDATE.log
+    echo "Time is equally divisible by 5 - getting forecast" >> $LOG
     FORECAST
 elif [[ $READY -eq 0 ]];
 then
-    echo "There's been a reboot - getting forecast" >> /var/log/cl0ck$LOGDATE.log
+    echo "There's been a reboot - getting forecast" >> $LOG
     FORECAST
 fi
 
@@ -345,7 +376,7 @@ elif [[ $DATEFORMAT = "none" ]];
 then
     TODAY=""
 else
-    echo "Could not determine date format" >> /var/log/cl0ck.err
+    echo "Could not determine date format" >> $LOG/cl0ck.err
 fi
 
 # NOW TO DO THE HEAVY LIFTING
@@ -365,7 +396,7 @@ $SUNFACE $SUNSIZE -gravity southwest -draw "text +145,+25 '$SUNSET' " \
 $OUT
 
         composite $WEATHERICON -gravity northwest $OUT /tmp/display_w.bmp
-        composite $WPATH/foregraph.png -gravity northeast /tmp/display_w.bmp /tmp/display_g.bmp
+        composite /tmp/foregraph.png -gravity northeast /tmp/display_w.bmp /tmp/display_g.bmp
         composite $WPATH/img/humidity-50.bmp -gravity northwest -geometry +75+100 /tmp/display_g.bmp /tmp/display_h.bmp
         composite $WPATH/img/sunupdown.bmp -gravity southwest -geometry +45+55 /tmp/display_h.bmp $OUT
         rm /tmp/display_w.bmp
