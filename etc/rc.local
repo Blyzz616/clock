@@ -2,6 +2,12 @@
 #
 # rc.local
 #
+echo 0 > /opt/cl0ck/status.rdy
+
+if [[ $(date +%S) -lt 50 ]];
+then
+    /IT8951/IT8951 0 0 /opt/cl0ck/default/display.bmp
+fi
 
 function LOCATIONLOOKUP() {
 # GET IP AND LOCATION BASED ON IP & PUT IN /tmp/location.out
@@ -36,7 +42,7 @@ sed -i -e "s/\(state\"\:[a-zA-Z ]*\)/state\"\:${STATE}"/ /etc/cl0ck/settings.jso
 # UPDATE CITY IN SETTINGS FILE
 sed -i -e "s/\(city\"\:[a-zA-Z ]*\)/city\"\:${CITY}"/ /etc/cl0ck/settings.json
 # UPDATE ZONENAME IN SETTINGS FILE - @ THAT SHIT
-sed -i -e "s@\(zonename\"\:[\a-zA-Z ]*\)@zonename\"\:${TIMEZONE}"@ /etc/cl0ck/settings.json
+sed -i -e "s@\(zonename\"\:[\a-zA-Z ]*\)@zonename\"\:${TIMEZONE}"/ /etc/cl0ck/settings.json
 # UPDATE TIMEZONE IN SETTINGS FILE
 sed -i -e "s/\(timezone\"\:[a-zA-Z ]*\)/timezone\"\:${TZ3}"/ /etc/cl0ck/settings.json
 # UPDATE ZONENAME IN SETTINGS FILE - @ THAT SHIT
