@@ -25,15 +25,16 @@ FLAVOUR=$(cat /etc/cl0ck/settings.json | grep flavour | awk -F: '{print $2}')
 SCHEME=$(cat /etc/cl0ck/settings.json | grep scheme | awk -F: '{print $2}')
 
 # WHICH FONT FACE?
-FACE="-font $(cat /etc/cl0ck/settings.json | grep face | awk -F: '{print $2}')"
+FACE="-font $(cat /etc/cl0ck/settings.json | grep face | grep -v sun | awk -F: '{print $2}')"
 SUNFACE="-font $(cat /etc/cl0ck/settings.json | grep sunface | awk -F: '{print $2}')"
 
 # FONT SIZES
-TIMESIZE="-pointsize 300"
-DATESIZE="-pointsize 50"
-WEATHERSIZE="-pointsize 75"
-HUMSIZE="-pointsize 50"
-SUNSIZE="-pointsize 25"
+TIMESIZE="-pointsize $(cat /etc/cl0ck/settings.json | grep timesize | awk -F: '{print $2}')"
+DATESIZE="-pointsize $(cat /etc/cl0ck/settings.json | grep datesize | awk -F: '{print $2}')"
+WEATHERSIZE="-pointsize $(cat /etc/cl0ck/settings.json | grep weathersize | awk -F: '{print $2}')"
+HUMSIZE="-pointsize $(cat /etc/cl0ck/settings.json | grep humsize | awk -F: '{print $2}')"
+SUNSIZE="-pointsize $(cat /etc/cl0ck/settings.json | grep sunsize | awk -F: '{print $2}')"
+WINDSIZE="-pointsize $(cat /etc/cl0ck/settings.json | grep windsize | awk -F: '{print $2}')"
 
 # WHAT DATE TO DISPLAY
 DATEFORMAT=$(cat /etc/cl0ck/settings.json | grep dateformat | awk -F: '{print $2}')
@@ -48,7 +49,7 @@ UPDATE() {
     # SEND IMAGE TO DISPLAY
     echo "Sending update to display" >> $LOG
     /IT8951/IT8951 0 0 $OUT
-    echo -e "Update sent to display\n***** DONE  - $(date +%c) *****\n\n" >> $LOG
+    echo -e "$(date +%H:%M:%S) - Update sent to display\n***** DONE  - $(date +%c) *****\n\n" >> $LOG
 }
 
 # SOMETIMES THE UPDATE DOESN'T COMPLETE, WHEN THIS HAPPENS THE IT8951 PROCESS STAYS OPEN
@@ -179,14 +180,23 @@ echo "TEMPDIFF = $TEMPDIFF" >> $LOG
     sed -i -e 's/^[[:blank:]]*$/0/g' $WPATH/quarter.csv
 
     # MERGE TIMES, TEMPS, RAINS, CLOUDS AND MARKERS INTO ONE FILE
-    echo -e "Pasting \n1) times\n2) temps\n3) rains\n4) clouds\n5) quarter\n to ready.csv" >> $LOG
+    echo -e "$(date +%H:%M:%S) - Pasting \n1) times\n2) temps\n3) rains\n4) clouds\n5) quarter\n to ready.csv" >> $LOG
     paste -d , $WPATH/times.csv $WPATH/temps.csv $WPATH/rains.csv $WPATH/clouds.csv $WPATH/quarter.csv > $WPATH/ready.csv
 
-    # DRAW THE GRAPH
+    #NEED TO FIGURE OUT WHAT SCALES TO USE ON THE GRAPH
     echo "Getting RAINMAX" >> $LOG
+    #THIS WILL GET THE ACTAUL RAIN
     RAINMAX=$(cat $WPATH/ready.csv | awk -F, '{print $3}' | sort -un | tail -n1)
     echo "RAINMAX = $RAINMAX" >> $LOG
-    RAINLVL=$(echo "$RAINMAX /* 100 | bc -l")
+    #THIS WILL GET THE INTEGER OF THE RAIN
+    PRERAIN=$(echo $RAINMAX | awk -F. '{print $1}')
+    echo "SETTING PRERAIN to $PRERAIN" >> $LOG
+    #THIS WILL GET THE FLOAT OF THE RAIN
+    POSTRAIN=$(echo $RAINMAX | awk -F. '{print $2}')
+    echo "SETTING POSTRAIN TO $POSTRAIN" >> $LOG
+    #THIS WILL BUILD A NON-INTEGER OF THE RAIN LEVEL (multiply the value by 100)
+    RAINLVL=$(printf %.0f "$((100 * $PRERAIN + $POSTRAIN))")
+    echo "RAINLVL = $RAINLVL" >> $LOG
 
 if [[ $TEMPDIFF -le 10 ]];
 then
@@ -195,26 +205,26 @@ then
     if [[ $RAINLVL = 0 ]];
     then
         RM="0"
-#        echo -e "    and RAINMAX = 0\n    using usage0.plot" >> $LOG
+#        echo -e "    and RAINMAX = 0" >> $LOG
     elif (( $(echo "$RAINLVL < 100" | bc -l) ));
     then
         RM="1"
-#        echo -e "    and RAINMAX < 1\n    using usage1.plot" >> $LOG
+#        echo -e "    and RAINMAX < 1" >> $LOG
     elif (( $(echo "$RAINLVL < 500" | bc -l) ));
     then
         RM="5"
-#        echo -e "    and RAINMAX < 5\n    using usage5.plot" >> $LOG
+#        echo -e "    and RAINMAX < 5" >> $LOG
     elif (( $(echo "$RAINLVL < 1000" | bc -l) ));
     then
         RM="10"
-#        echo -e "    and RAINMAX < 10\n    using usage10.plot" >> $LOG
+#        echo -e "    and RAINMAX < 10" >> $LOG
     elif (( $(echo "$RAINLVL < 2000" | bc -l) ));
     then
         RM="20"
-#        echo -e "    and RAINMAX < 20\n    using usage20.plot" >> $LOG
+#        echo -e "    and RAINMAX < 20" >> $LOG
     else
         RM=""
-#        echo -e "    and RAINMAX > 20\n    using usage.plot" >> $LOG
+#        echo -e "    and RAINMAX > 20" >> $LOG
     fi
 else
     echo "TEMPDIFF > 10" >> $LOG
@@ -222,31 +232,31 @@ else
     if [[ $RAINLVL = 0 ]];
     then
         RM="0"
-#        echo -e "    and RAINMAX = 0\n    using usage0-20.plot" >> $LOG
+#        echo -e "    and RAINMAX = 0" >> $LOG
     elif (( $(echo "$RAINLVL < 100" | bc -l) ));
     then
         RM="1"
-#        echo -e "    and RAINMAX < 1\n    using usage1-20.plot" >> $LOG
+#        echo -e "    and RAINMAX < 1" >> $LOG
     elif (( $(echo "$RAINLVL < 500" | bc -l) ));
     then
         RM="5"
-#        echo -e "    and RAINMAX < 5\n    using usage5-20.plot" >> $LOG
+#        echo -e "    and RAINMAX < 5" >> $LOG
     elif (( $(echo "$RAINLVL < 1000" | bc -l) ));
     then
         RM="10"
-#        echo -e "    and RAINMAX < 10\n    using usage10-20.plot" >> $LOG
+#        echo -e "    and RAINMAX < 10" >> $LOG
     elif (( $(echo "$RAINLVL < 2000" | bc -l) ));
     then
         RM="20"
-#        echo -e "    and RAINMAX < 20\n    using usage20-20.plot" >> $LOG
+#        echo -e "    and RAINMAX < 20" >> $LOG
     else
         RM=""
-#        echo -e "    and RAINMAX > 20\n    using usage-20.plot" >> $LOG
+#        echo -e "    and RAINMAX > 20" >> $LOG
     fi
 fi
 
 # DRAW THE GRAPH USING THE CORRECT SCALES
-#echo -e "    and RAINMAX > 20\n    using usage$RM$TD.plot" >> $LOG
+echo -e "$(date +%H:%M:%S) -     using usage$RM$TD.plot" >> $LOG
 gnuplot $WPATH/usage$RM$TD.plot > /tmp/foregraph.png
 
     # CROP THE GRAPH
@@ -271,7 +281,7 @@ WEATHER() {
     ESUNRISE=$(echo $OPENWEATHER | egrep -o 'sunrise\":[0-9]*' | awk -F: '{print $2}')
     ESUNSET=$(echo $OPENWEATHER | egrep -o 'sunset\":[0-9]*' | awk -F: '{print $2}')
     CLOUDS=$(echo $OPENWEATHER | egrep -o 'description\":\"[a-zA-Z ]*' | awk -F: '{print $2}' | cut -c2-)
-    ICON=$(echo $OPENWEATHER | egrep -o 'icon\":\"[a-z0-9]*' | awk -F: '{print $2}' | cut -c2-)
+    ICON=$(echo $OPENWEATHER | egrep -o 'icon\":\"[a-z0-9]*' | awk -F: '{print $2}' | cut -c2- | head -n1)
 
     SUNRISE=$(date -d @$ESUNRISE +%H:%M)
     SUNSET=$(date -d @$ESUNSET +%H:%M)
@@ -290,7 +300,9 @@ WEATHER() {
     echo "SUNSET = $SUNSET" >> $WPATH/weather.dump
     echo "CLOUDS = $CLOUDS" >> $WPATH/weather.dump
     echo "ICON = $ICON" >> $WPATH/weather.dump
-    WEATHERICON="$WPATH/img/$ICON.bmp"
+    WEATHERICON="/opt/cl0ck/weather/img/$ICON.bmp"
+    echo -e "$(date +%H:%M:%S) - WEATHERICON = $WEATHERICON" >> $LOG
+    #WEATHERICON="/opt/cl0ck/weather/img/10n.bmp"
 }
 
 WEATHER
@@ -386,6 +398,7 @@ DIGITAL() {
     then
         convert -size 800x600 xc:$CANVAS $FACE $TIMESIZE -gravity center -draw "text $ALIGN '$H:$M' " $OUT
     else
+        convert $WPATH/img/windg.png -background none -virtual-pixel background -distort ScaleRotateTranslate $WINDBEARING /tmp/wind.png
         convert -size 800x600 xc:$CANVAS \
 $FACE $TIMESIZE -gravity center -draw "text $ALIGN '$H:$M' " \
 $FACE $WEATHERSIZE -gravity northwest -draw "text +100,+15 '$TEMP' " \
@@ -393,15 +406,20 @@ $FACE $DATESIZE -gravity southeast -draw "text +20,+40 '$TODAY' " \
 $FACE $HUMSIZE -gravity northwest -draw "text +20,+95 '$HUMIDITY' " \
 $SUNFACE $SUNSIZE -gravity southwest -draw "text +10,+25 '$SUNRISE' " \
 $SUNFACE $SUNSIZE -gravity southwest -draw "text +145,+25 '$SUNSET' " \
+$SUNFACE $WINDSIZE -gravity northwest -draw "text +195,+80 '$WINDSPEED'" \
 $OUT
 
         composite $WEATHERICON -gravity northwest $OUT /tmp/display_w.bmp
         composite /tmp/foregraph.png -gravity northeast /tmp/display_w.bmp /tmp/display_g.bmp
         composite $WPATH/img/humidity-50.bmp -gravity northwest -geometry +75+100 /tmp/display_g.bmp /tmp/display_h.bmp
-        composite $WPATH/img/sunupdown.bmp -gravity southwest -geometry +45+55 /tmp/display_h.bmp $OUT
+#        composite $WPATH/img/sunupdown.bmp -gravity southwest -geometry +45+55 /tmp/display_h.bmp $OUT
+        composite $WPATH/img/sunupdown.bmp -gravity southwest -geometry +45+55 /tmp/display_h.bmp /tmp/display_s.bmp
+        composite /tmp/wind.png -gravity northwest -geometry +150+45 /tmp/display_s.bmp $OUT
         rm /tmp/display_w.bmp
         rm /tmp/display_g.bmp
         rm /tmp/display_h.bmp
+        rm /tmp/display_s.bmp
+cp $OUT /home/cl0ck/
     fi
 }
 
