@@ -194,8 +194,18 @@ echo "TEMPDIFF = $TEMPDIFF" >> $LOG
     #THIS WILL GET THE FLOAT OF THE RAIN
     POSTRAIN=$(echo $RAINMAX | awk -F. '{print $2}')
     echo "SETTING POSTRAIN TO $POSTRAIN" >> $LOG
-    #THIS WILL BUILD A NON-INTEGER OF THE RAIN LEVEL (multiply the value by 100)
-    RAINLVL=$(printf %.0f "$((100 * $PRERAIN + $POSTRAIN))")
+    if [[ $PRERAIN -eq 0 ]];
+        then
+        echo "PRERAIN was 0 so checking POSTRAIN" >> $LOG
+        if [[ $POSTRAIN="" ]];
+            then
+            echo "POST RAIN is empty, so setting RAINLVL to 0" >> $LOG
+            RAINLVL=0
+        fi
+    else
+        #THIS WILL BUILD A NON-INTEGER OF THE RAIN LEVEL (multiply the value by 100)
+        RAINLVL=$(printf %.0f "$((100 * $PRERAIN + $POSTRAIN))")
+    fi
     echo "RAINLVL = $RAINLVL" >> $LOG
 
 if [[ $TEMPDIFF -le 10 ]];
@@ -270,10 +280,10 @@ WEATHER() {
 
     echo "Populating variables for all current conditions" >> $LOG
     OPENWEATHER=$(cat $WPATH/now.json)
-    TEMP="$(echo $OPENWEATHER | egrep -o 'temp\":[0-9.]*' | awk -F: '{print $2}' | awk '{print ($0-int($0)<0.499)?int($0):int($0)+1}')°"
-    FEELSLIKE=$(echo $OPENWEATHER | egrep -o 'feels\_like\":[0-9.]*' | awk -F: '{print $2}' | awk '{print ($0-int($0)<0.499)?int($0):int($0)+1}')
-    TMIN=$(echo $OPENWEATHER | egrep -o 'temp\_min\":[0-9.]*' | awk -F: '{print $2}')
-    TMAX=$(echo $OPENWEATHER | egrep -o 'temp\_max\":[0-9.]*' | awk -F: '{print $2}')
+    TEMP="$(echo $OPENWEATHER | egrep -o 'temp\":-?[0-9.]*' | awk -F: '{print $2}' | awk '{print ($0-int($0)<0.499)?int($0):int($0)+1}')°"
+    FEELSLIKE=$(echo $OPENWEATHER | egrep -o 'feels\_like\":-?[0-9.]*' | awk -F: '{print $2}' | awk '{print ($0-int($0)<0.499)?int($0):int($0)+1}')
+    TMIN=$(echo $OPENWEATHER | egrep -o 'temp\_min\":-?[0-9.]*' | awk -F: '{print $2}')
+    TMAX=$(echo $OPENWEATHER | egrep -o 'temp\_max\":-?[0-9.]*' | awk -F: '{print $2}')
     PRESSURE=$(echo $OPENWEATHER | egrep -o 'pressure\":[0-9]*' | awk -F: '{print $2}')
     HUMIDITY=$(echo $OPENWEATHER | egrep -o 'humidity\":[0-9]*' | awk -F: '{print $2}')
     WINDSPEED=$(echo $OPENWEATHER | egrep -o 'speed\":[0-9]*' | awk -F: '{print $2}')
@@ -286,7 +296,7 @@ WEATHER() {
     SUNRISE=$(date -d @$ESUNRISE +%H:%M)
     SUNSET=$(date -d @$ESUNSET +%H:%M)
 
-    echo "TEMP = $TEMP°" > $WPATH/weather.dump
+    echo "TEMP = $TEMP" > $WPATH/weather.dump
     echo "FEELSLIKE = $FEELSLIKE°C" >> $WPATH/weather.dump
     echo "TMIN = $TMIN°C" >> $WPATH/weather.dump
     echo "TMAX = $TMAX°C" >> $WPATH/weather.dump
@@ -399,15 +409,29 @@ DIGITAL() {
         convert -size 800x600 xc:$CANVAS $FACE $TIMESIZE -gravity center -draw "text $ALIGN '$H:$M' " $OUT
     else
         convert $WPATH/img/windg.png -background none -virtual-pixel background -distort ScaleRotateTranslate $WINDBEARING /tmp/wind.png
-        convert -size 800x600 xc:$CANVAS \
-$FACE $TIMESIZE -gravity center -draw "text $ALIGN '$H:$M' " \
-$FACE $WEATHERSIZE -gravity northwest -draw "text +100,+15 '$TEMP' " \
-$FACE $DATESIZE -gravity southeast -draw "text +20,+40 '$TODAY' " \
-$FACE $HUMSIZE -gravity northwest -draw "text +20,+95 '$HUMIDITY' " \
-$SUNFACE $SUNSIZE -gravity southwest -draw "text +10,+25 '$SUNRISE' " \
-$SUNFACE $SUNSIZE -gravity southwest -draw "text +145,+25 '$SUNSET' " \
-$SUNFACE $WINDSIZE -gravity northwest -draw "text +195,+80 '$WINDSPEED'" \
-$OUT
+
+        if [[ $WINDSPEED -gt 9 ]];
+        then
+            convert -size 800x600 xc:$CANVAS \
+            $FACE $TIMESIZE -gravity center -draw "text $ALIGN '$H:$M' " \
+            $FACE $WEATHERSIZE -gravity northwest -draw "text +100,+15 '$TEMP' " \
+            $FACE $DATESIZE -gravity southeast -draw "text +20,+40 '$TODAY' " \
+            $FACE $HUMSIZE -gravity northwest -draw "text +20,+95 '$HUMIDITY' " \
+            $SUNFACE $SUNSIZE -gravity southwest -draw "text +10,+25 '$SUNRISE' " \
+            $SUNFACE $SUNSIZE -gravity southwest -draw "text +145,+25 '$SUNSET' " \
+            $SUNFACE $WINDSIZE -gravity northwest -draw "text +185,+80 '$WINDSPEED'" \
+            $OUT
+        else
+            convert -size 800x600 xc:$CANVAS \
+            $FACE $TIMESIZE -gravity center -draw "text $ALIGN '$H:$M' " \
+            $FACE $WEATHERSIZE -gravity northwest -draw "text +100,+15 '$TEMP' " \
+            $FACE $DATESIZE -gravity southeast -draw "text +20,+40 '$TODAY' " \
+            $FACE $HUMSIZE -gravity northwest -draw "text +20,+95 '$HUMIDITY' " \
+            $SUNFACE $SUNSIZE -gravity southwest -draw "text +10,+25 '$SUNRISE' " \
+            $SUNFACE $SUNSIZE -gravity southwest -draw "text +145,+25 '$SUNSET' " \
+            $SUNFACE $WINDSIZE -gravity northwest -draw "text +195,+80 '$WINDSPEED'" \
+            $OUT
+        fi
 
         composite $WEATHERICON -gravity northwest $OUT /tmp/display_w.bmp
         composite /tmp/foregraph.png -gravity northeast /tmp/display_w.bmp /tmp/display_g.bmp
