@@ -22,7 +22,10 @@ bc
 imagemagick
 gnuplot
 evtest
+git
 
 apt update -y
 apt upgrade -y
-apt install bc imagemagick gnuplot evtest
+apt install bc imagemagick gnuplot evtest git
+
+git clone https://github.com/waveshare/IT8951.git
