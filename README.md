@@ -1,6 +1,10 @@
 # clock
 Building an e-Ink bed-side clock
 
+Youtube  Video:
+
+[![Recent Update](https://img.youtube.com/vi/livEQYvz51s/0.jpg)](https://www.youtube.com/watch?v=livEQYvz51s)
+
 This is going to be an alarm clock that has zero light emmissions and highly configurable.
 
 It's going to be built from a Raspberry Pi zero W as it's underlying computer and a 6" e-Ink display.
