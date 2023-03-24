@@ -71,7 +71,7 @@ CLEAN
 
 # GET HOURLY INFO (EVERY 5 MINUTES)
 FORECAST() {
-    curl -s "https://api.openweathermap.org/data/2.5/onecall?lat=49.05&lon=-122.29&exclude=current,minutely,daily&appid=12cf76465a58356df52c88853dbfe100&units=metric" > /tmp/hourly.out
+    curl -s "https://api.openweathermap.org/data/2.5/onecall?lat=49.05&lon=-122.29&exclude=current,minutely,daily&appid=<yourAPIkey>&units=metric" > /tmp/hourly.out
     echo "Curled onecall from owm" >> $LOG
 
     # MAKE SURE THAT THE FILES ARE THERE AND READY
